@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+        
+        <link rel="stylesheet" href="/css/global.css">
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script defer src="/javascripts/script.js" ></script>
+
+        <title>MCO1</title>
+
+    </head>
+    <body>
+        <div id="page-container">
+            <div id="main">
+              <h1><i class="icon-gamepad fa-4x"></i> Steam Games Dashboard</h1>
+            
+
+              <form action="/submit" method="POST">
+                  <label for="optionSelect">Choose an option:</label>
+                  <select name="optionSelect" id="optionSelect">
+                      <!-- Query options will be added here -->
+                  </select>
+
+              </form>
+              
+              <h3> Table Preview </h3>
+              <table id="queryTable">
+                <thead>
+                    <tr id="tableHeaders">
+                        <!-- Columns will be added here -->
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Rows will be added here -->
+                </tbody>
+              </table>
+
+              <h3> Charts </h3>
+
+
+
+            </div>
+
+
+          <footer>
+                <hr/>
+                <em>MCO1 Project - Created by Capunitan, Santiago, & Villarica (XX22) </em>
+          </footer>
+
+        </div>
+
+
+    </body>
+
+
+</html>
