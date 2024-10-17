@@ -71,4 +71,18 @@ router.get('/get-rows', (req, res) => {
   });
 });
 
+router.get('/get-customers-per-location', (req, res) => {
+
+  const query = 'SELECT storeLocation, COUNT(id) AS count FROM supplies_orders GROUP BY storeLocation;'
+
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database query for customers per location failed' });
+    }
+
+    res.json(results);
+  });
+});
+
+
 module.exports = router;

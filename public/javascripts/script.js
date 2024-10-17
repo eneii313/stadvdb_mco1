@@ -51,8 +51,6 @@ $(document).ready(function() {
 
             $('#tableBody').empty();
     
-            console.log("Page: ", data.page);
-    
             // Generate table rows
             $.each(rows, function(index, row) {
                 let rowHtml = '<tr>';
@@ -100,6 +98,77 @@ $(document).ready(function() {
             $("#prevBtn").prop("disabled", true );
         }
     });
+
+    
+    // CHART CONFIGS
+    const barChart = $('#barChart');
+    const pieChart = $('#pieChart');
+
+
+    function fillBarGraph() {
+        let barLabels = []
+        let barValues = []
+
+        $.get('/get-customers-per-location', function(data) {
+            $.each(data, function(index, item) {
+              barLabels.push(item.storeLocation)
+              console.log("PUSHING ", item.storeLocation)
+              barValues.push(item.count)
+            });
+
+            new Chart(barChart, {
+                type: 'bar',
+                data: {
+                labels: barLabels,
+                datasets: [{
+                    label: '# of Customers',
+                    data: barValues,
+                    borderWidth: 1
+                }]
+                },
+                options: {
+                scales: {
+                    y: {
+                    beginAtZero: true
+                    }
+                }
+                }
+            });
+
+            new Chart(pieChart, {
+                type: 'pie',
+                data: {
+                labels: barLabels,
+                datasets: [{
+                    label: '# of Customers',
+                    data: barValues,
+                    borderWidth: 1
+                }]
+                },
+                options: {
+                scales: {
+                    y: {
+                    beginAtZero: true
+                    }
+                }
+                }
+            });
+
+            
+        })
+        .fail(function(xhr, status, error) {
+            console.error('Error:', error);
+        });
+
+
+    }
+
+    fillBarGraph();
+
+    
+
+
+    
 
 
 });
