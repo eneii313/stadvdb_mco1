@@ -17,42 +17,55 @@ $(document).ready(function() {
         console.error('Error:', error);
     });
 
-
+    let columns = []
     let currentPage = 1;
     const limit = 10;
 
     $("#prevBtn").prop("disabled", true );
 
     function getColumns() {
+        columns = []
 
+        $.get('/get-columns', function(data) {
+    
+            let cols = data.columns;
+
+            $('#tableHeaders').empty();
+    
+            // Generate table headers
+            $.each(cols, function(index, col) {
+                $('#tableHeaders').append(`<th>${col.COLUMN_NAME}</th>`);
+                columns.push(col.COLUMN_NAME);
+            });
+    
+        })
+        .fail(function(xhr, status, error) {
+            console.error('Error:', error);
+        });
     }
 
     function getRows(page) {
         $.get('/get-rows', {page: page, limit: limit}, function(data) {
-            console.log("SUCCESS getting orders");
     
-            let columns = data.columns;
             let rows = data.rows;
 
             $('#tableBody').empty();
     
-    
             console.log("Page: ", data.page);
-            console.log("Row Count: ", data.limit);
-            // Generate table headers
-            $.each(columns, function(index, column) {
-                $('#tableHeaders').append(`<th>${column.COLUMN_NAME}</th>`);
-            });
     
             // Generate table rows
             $.each(rows, function(index, row) {
                 let rowHtml = '<tr>';
-                $.each(columns, function(i, column) {
-                    rowHtml += `<td>${row[column.COLUMN_NAME]}</td>`;
+                $.each(columns, function(i) {
+                    rowHtml += `<td>${row[columns[i]]}</td>`;
                 });
                 rowHtml += '</tr>';
                 $('#tableBody').append(rowHtml);
             });
+
+            if (rows.length < limit) {
+                $("#nextBtn").prop("disabled", true );
+            }
     
         })
         .fail(function(xhr, status, error) {
@@ -61,7 +74,8 @@ $(document).ready(function() {
         
     }
 
-    // initial rows
+    // initial table
+    getColumns();
     getRows(currentPage);
 
     // "Next" rows
@@ -79,10 +93,12 @@ $(document).ready(function() {
             currentPage -= 1;
             getRows(currentPage);
             $("#currentPage").text(currentPage);
+            $("#nextBtn").prop("disabled", false );
         }
 
-        if (currentPage = 1)
+        if (currentPage == 1) {
             $("#prevBtn").prop("disabled", true );
+        }
     });
 
 

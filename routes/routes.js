@@ -19,7 +19,7 @@ db.connect(function(err) {
   console.log("Connected to MySQL Database");
 });
 
-// QUERIES
+// ------------------------------------------------ QUERIES ------------------------------------------------
 router.get('/get-options', (req, res) => {
 
     const query = 'SELECT DISTINCT tag_name FROM supplies_order_item_tags;';
@@ -34,36 +34,40 @@ router.get('/get-options', (req, res) => {
     });
 });
 
+router.get('/get-columns', (req, res) => {
+  const query = `SELECT COLUMN_NAME
+                  FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_NAME = 'supplies_orders'
+                  ORDER BY ORDINAL_POSITION;`;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database query for attributes failed' });
+    }
+
+      res.json({ columns: results});
+
+  });
+});
+
 
 router.get('/get-rows', (req, res) => {
 
   let page = parseInt(req.query.page) || 1;  // current page
   let limit = parseInt(req.query.limit) || 10;  // rows per page
   let offset = (page - 1) * limit;  // offset for SQL query
+        
+  const query = 'SELECT * FROM supplies_orders LIMIT ? OFFSET ?;';
 
-  const query1 = `SELECT COLUMN_NAME
-                  FROM INFORMATION_SCHEMA.COLUMNS
-                  WHERE TABLE_NAME = 'supplies_orders'
-                  ORDER BY ORDINAL_POSITION;`;
+  // used this to test page limit
+  // const query = 'SELECT * FROM h01.supplies_orders WHERE YEAR(saleDate) = 2015 AND MONTH(saleDate) = 10 LIMIT ? OFFSET ?';
 
-                  
-  const query2 = 'SELECT * FROM supplies_orders LIMIT ? OFFSET ?;';
-
-  db.query(query1, (err, results1) => {
+  db.query(query, [limit, offset], (err, results) => {
     if (err) {
-      console.error('Error executing first query:', err);
-      return res.status(500).json({ error: 'Database query failed' });
+      return res.status(500).json({ error: 'Database query for rows failed' });
     }
 
-    db.query(query2, [limit, offset], (err, results2) => {
-      if (err) {
-        console.error('Error executing second query:', err);
-        return res.status(500).json({ error: 'Database query failed' });
-      }
-
-      res.json({ columns: results1, rows: results2, page: page, limit: limit });
-    });
-
+    res.json({ rows: results, page: page, limit: limit });
   });
 });
 

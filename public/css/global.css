@@ -21,7 +21,7 @@ h1 {
     width: 100%;
     border:1px solid gray;
     border-collapse: collapse;
-    table-layout: auto;
+    table-layout: fixed;
 }
 
 #tableHeaders {
@@ -48,7 +48,6 @@ h1 {
 #tableBody  tr:nth-child(even) {background-color: #f0f0f0;}
 
 #tableButtons {
-    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;  
