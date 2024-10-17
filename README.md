@@ -10,7 +10,7 @@ const db = mysql.createConnection({
 });
 ```
 
+STADVDB - XX22
 - Capunitan
 - Santiago
-- Villarica
-STADVDB - XX22
+- Villarica  
