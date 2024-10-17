@@ -25,7 +25,7 @@
               <h1><i class="icon-gamepad fa-4x"></i> Steam Games Dashboard</h1>
             
 
-              <form action="/submit" method="POST">
+              <form action="/submit" method="GET">
                   <label for="optionSelect">Choose an option:</label>
                   <select name="optionSelect" id="optionSelect">
                       <!-- Query options will be added here -->
@@ -44,6 +44,12 @@
                     <!-- Rows will be added here -->
                 </tbody>
               </table>
+
+              <div id="tableButtons">
+                <button id="prevBtn">PREV</button>
+                <div>Page <span id="currentPage">1</span></div>
+                <button id="nextBtn">NEXT</button>
+              </div>
 
               <h3> Charts </h3>
 

@@ -35,13 +35,19 @@ router.get('/get-options', (req, res) => {
 });
 
 
-router.get('/get-orders', (req, res) => {
+router.get('/get-rows', (req, res) => {
+
+  let page = parseInt(req.query.page) || 1;  // current page
+  let limit = parseInt(req.query.limit) || 10;  // rows per page
+  let offset = (page - 1) * limit;  // offset for SQL query
 
   const query1 = `SELECT COLUMN_NAME
                   FROM INFORMATION_SCHEMA.COLUMNS
                   WHERE TABLE_NAME = 'supplies_orders'
                   ORDER BY ORDINAL_POSITION;`;
-  const query2 = 'SELECT * FROM supplies_orders LIMIT 10;';
+
+                  
+  const query2 = 'SELECT * FROM supplies_orders LIMIT ? OFFSET ?;';
 
   db.query(query1, (err, results1) => {
     if (err) {
@@ -49,13 +55,13 @@ router.get('/get-orders', (req, res) => {
       return res.status(500).json({ error: 'Database query failed' });
     }
 
-    db.query(query2, (err, results2) => {
+    db.query(query2, [limit, offset], (err, results2) => {
       if (err) {
         console.error('Error executing second query:', err);
         return res.status(500).json({ error: 'Database query failed' });
       }
 
-      res.json({ columns: results1, rows: results2 });
+      res.json({ columns: results1, rows: results2, page: page, limit: limit });
     });
 
   });

@@ -18,7 +18,7 @@ h1 {
 }
 
 #queryTable {
-    width: 100vw;
+    width: 100%;
     border:1px solid gray;
     border-collapse: collapse;
     table-layout: auto;
@@ -46,6 +46,34 @@ h1 {
 }
 
 #tableBody  tr:nth-child(even) {background-color: #f0f0f0;}
+
+#tableButtons {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;  
+    padding: 10px;
+}
+
+#tableButtons button{
+    background-color: black;
+    border: none;
+    color: white;
+    padding: 4px 10px;
+    margin: 0 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+}
+
+#tableButtons button:disabled{
+    background-color: gray;
+    cursor: not-allowed;
+}
+
+#tableButtons div {
+    margin: 2px;
+}
 
 footer {
     position: fixed;
