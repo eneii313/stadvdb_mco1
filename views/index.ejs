@@ -24,15 +24,24 @@
         <div id="page-container">
             <div id="main">
               <h1><i class="icon-gamepad fa-4x"></i> Steam Games Dashboard</h1>
+              <hr>
             
+              <div id="query">
+                <form method="GET">
+                    <label for="querySelect">Select a query:</label>
+                    <select name="querySelect" id="querySelect">
+                        <option value="" selected disabled>Select a query to generate a report.</option>
+                        <!-- Query options will be added here -->
+                         <option>Sample QUERY 1</option>
+                         <option>Sample QUERY 2</option>
+                    </select>
+                </form>
+              </div>
 
-              <form action="/submit" method="GET">
-                  <label for="optionSelect">Choose an option:</label>
-                  <select name="optionSelect" id="optionSelect">
-                      <!-- Query options will be added here -->
-                  </select>
 
-              </form>
+              <div id="queryTimer">
+                <h4>Progress: <span id="queryProgress">Selecting a query...</span></h4>
+              </div>
               
               <h3> Table Preview </h3>
               <table id="queryTable">

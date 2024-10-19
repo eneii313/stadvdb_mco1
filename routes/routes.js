@@ -10,7 +10,7 @@ const db = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "root",
-  database: "h01",
+  database: "mco1",
   multipleStatements: true,
 });
 
@@ -37,7 +37,7 @@ router.get('/get-options', (req, res) => {
 router.get('/get-columns', (req, res) => {
   const query = `SELECT COLUMN_NAME
                   FROM INFORMATION_SCHEMA.COLUMNS
-                  WHERE TABLE_NAME = 'supplies_orders'
+                  WHERE TABLE_NAME = 'games'
                   ORDER BY ORDINAL_POSITION;`;
 
   db.query(query, (err, results) => {
@@ -57,10 +57,7 @@ router.get('/get-rows', (req, res) => {
   let limit = parseInt(req.query.limit) || 10;  // rows per page
   let offset = (page - 1) * limit;  // offset for SQL query
         
-  const query = 'SELECT * FROM supplies_orders LIMIT ? OFFSET ?;';
-
-  // used this to test page limit
-  // const query = 'SELECT * FROM h01.supplies_orders WHERE YEAR(saleDate) = 2015 AND MONTH(saleDate) = 10 LIMIT ? OFFSET ?';
+  const query = 'SELECT * FROM games LIMIT ? OFFSET ?;';
 
   db.query(query, [limit, offset], (err, results) => {
     if (err) {
@@ -71,9 +68,11 @@ router.get('/get-rows', (req, res) => {
   });
 });
 
-router.get('/get-customers-per-location', (req, res) => {
+router.get('/get-genres', (req, res) => {
 
-  const query = 'SELECT storeLocation, COUNT(id) AS count FROM supplies_orders GROUP BY storeLocation;'
+  const query = `SELECT genre, COUNT(*) AS count FROM  game_genres
+                  GROUP BY genre 
+                  ORDER BY count DESC;`
 
   db.query(query, (err, results) => {
     if (err) {
@@ -81,6 +80,19 @@ router.get('/get-customers-per-location', (req, res) => {
     }
 
     res.json(results);
+  });
+});
+
+router.get('/get-all', (req, res) => {
+  const query = `SELECT * FROM games`;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database query failed' });
+    }
+
+      res.json({ columns: results});
+
   });
 });
 

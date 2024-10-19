@@ -1,25 +1,61 @@
 
 $(document).ready(function() {
 
-    $.get('/get-options', function(data) {
-        // console.log("SUCCESS getting options");
+    // $.get('/get-options', function(data) {
+    //     // console.log("SUCCESS getting options");
 
-        const $select = $('#optionSelect');
+    //     const $select = $('#optionSelect');
 
-        $select.empty();
+    //     $select.empty();
 
-        // create <option> elements and append them to <select>
-        $.each(data, function(index, item) {
-          $select.append(`<option value="${item.tag_name}">${item.tag_name}</option>`);
-        });
-    })
-    .fail(function(xhr, status, error) {
-        console.error('Error:', error);
-    });
+    //     // create <option> elements and append them to <select>
+    //     $.each(data, function(index, item) {
+    //       $select.append(`<option value="${item.tag_name}">${item.tag_name}</option>`);
+    //     });
+    // })
+    // .fail(function(xhr, status, error) {
+    //     console.error('Error:', error);
+    // });
 
     let columns = []
     let currentPage = 1;
     const limit = 10;
+    const top_count = 10;
+
+
+    $('#querySelect').on('change', function() {
+        generateReport();
+    });
+
+
+    function generateReport() {
+        $("#queryProgress").text("Generating query report...");
+        let startTime = performance.now();
+       
+        callSQL(() => {
+            let endTime = performance.now();
+            let timeTaken = ((endTime - startTime) / 1000).toFixed(2); // Time in seconds
+
+            $("#queryProgress").text("Report finished. Time taken: " + timeTaken + " seconds");
+        });
+    }
+
+    function callSQL(callback) {
+        getAll(callback);
+    }
+
+    function getAll(callback) {
+        $.get('/get-all', function(data) {
+
+            console.log("DONE ALL GAMES");
+            callback();
+    
+        })
+        .fail(function(xhr, status, error) {
+            console.error('Error:', error);
+            callback();
+        });
+    }
 
     $("#prevBtn").prop("disabled", true );
 
@@ -109,10 +145,14 @@ $(document).ready(function() {
         let barLabels = []
         let barValues = []
 
-        $.get('/get-customers-per-location', function(data) {
+        $.get('/get-genres', function(data) {
             $.each(data, function(index, item) {
-              barLabels.push(item.storeLocation)
-              console.log("PUSHING ", item.storeLocation)
+
+                if (index >= top_count) {
+                    return false;
+                }
+
+              barLabels.push(item.genre)
               barValues.push(item.count)
             });
 
@@ -121,7 +161,7 @@ $(document).ready(function() {
                 data: {
                 labels: barLabels,
                 datasets: [{
-                    label: '# of Customers',
+                    label: 'Top Counts per Genre',
                     data: barValues,
                     borderWidth: 1
                 }]
@@ -140,7 +180,7 @@ $(document).ready(function() {
                 data: {
                 labels: barLabels,
                 datasets: [{
-                    label: '# of Customers',
+                    label: 'Top Counts per Genre',
                     data: barValues,
                     borderWidth: 1
                 }]

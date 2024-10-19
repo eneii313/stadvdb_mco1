@@ -18,6 +18,31 @@ h1 {
     font-family: 'Lato', serif;
 }
 
+#query {
+    background-color: #f0f0f0;
+    width: 100%;
+}
+
+#queryProgress {
+    font-weight: normal;
+    font-style: italic;
+}
+
+label {
+    font-weight: bold;
+    font-size: 1.25em;
+    margin: 0 10px;
+}
+
+select {
+    margin-top: 10px;
+    width: min-content;
+}
+
+label, select {
+    display: inline-block;
+}
+
 #queryTable {
     width: 100%;
     border:1px solid gray;
