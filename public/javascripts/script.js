@@ -17,37 +17,61 @@ $(document).ready(function() {
     //     console.error('Error:', error);
     // });
 
-    let columns = []
-    let currentPage = 1;
+    var columns = []
+    var rows = []
+    var currentPage = 1;
     const limit = 10;
     const top_count = 10;
 
+    // hide table and charts on startup
+    $(".hideOnStart").hide();
 
     $('#querySelect').on('change', function() {
-        generateReport();
+        currentPage = 1;
+        generateReport($('#querySelect').val());
     });
 
 
-    function generateReport() {
+    function generateReport(queryNum) {
+        var queryRoute = "";
+        switch (queryNum) {
+            case "1": 
+                queryRoute = "/get-avg-price-all";
+                break;
+            default: 
+                console.log("Invalid query number.");
+                return;
+        } 
+
         $("#queryProgress").text("Generating query report...");
         let startTime = performance.now();
        
-        callSQL(() => {
+        callSQLQuery(queryRoute, function() {
             let endTime = performance.now();
             let timeTaken = ((endTime - startTime) / 1000).toFixed(2); // Time in seconds
 
             $("#queryProgress").text("Report finished. Time taken: " + timeTaken + " seconds");
+            $(".hideOnStart").show();
         });
     }
 
-    function callSQL(callback) {
-        getAll(callback);
-    }
+    function callSQLQuery(queryRoute, callback) {
+        $.get(queryRoute, function(data) {
+            columns = data.columns
+            rows = data.rows
+            
+            $('#tableHeaders').empty();
+    
+            // Generate table headers
+            $.each(columns, function(index, col) {
+                $('#tableHeaders').append(`<th>`+col+`</th>`);
+            });
 
-    function getAll(callback) {
-        $.get('/get-all', function(data) {
+            // generate first 10 rows
+            getRows(currentPage);
+            // generate charts
+            fillBarGraph();
 
-            console.log("DONE ALL GAMES");
             callback();
     
         })
@@ -80,37 +104,68 @@ $(document).ready(function() {
         });
     }
 
+
     function getRows(page) {
-        $.get('/get-rows', {page: page, limit: limit}, function(data) {
+        let counter = 0;
+        let stopLoop = false;
+        
+        $('#tableBody').empty();
     
-            let rows = data.rows;
+        // Generate table rows
+        $.each(rows, function(index, row) {
+            if (stopLoop) return false;
+            let rowHtml = '<tr>';
+            $.each(columns, function(i) {
+                let cellValue = row[columns[i]];
+                if (cellValue === null)
+                    cellValue = "-"
 
-            $('#tableBody').empty();
-    
-            // Generate table rows
-            $.each(rows, function(index, row) {
-                let rowHtml = '<tr>';
-                $.each(columns, function(i) {
-                    rowHtml += `<td>${row[columns[i]]}</td>`;
-                });
-                rowHtml += '</tr>';
-                $('#tableBody').append(rowHtml);
+                rowHtml += `<td>`+cellValue+`</td>`;
             });
+            rowHtml += '</tr>';
+            $('#tableBody').append(rowHtml);
 
-            if (rows.length < limit) {
-                $("#nextBtn").prop("disabled", true );
+            counter++;
+            if (counter == limit) {
+                stopLoop = true;
             }
-    
-        })
-        .fail(function(xhr, status, error) {
-            console.error('Error:', error);
         });
+
+
+        if (rows.length < limit) {
+            $("#nextBtn").prop("disabled", true );
+        }
+        
+        // $.get('/get-rows', {page: page, limit: limit}, function(data) {
+    
+        //     let rows = data.rows;
+
+        //     $('#tableBody').empty();
+    
+        //     // Generate table rows
+        //     $.each(rows, function(index, row) {
+        //         let rowHtml = '<tr>';
+        //         $.each(columns, function(i) {
+        //             rowHtml += `<td>${row[columns[i]]}</td>`;
+        //         });
+        //         rowHtml += '</tr>';
+        //         $('#tableBody').append(rowHtml);
+        //     });
+
+        //     if (rows.length < limit) {
+        //         $("#nextBtn").prop("disabled", true );
+        //     }
+    
+        // })
+        // .fail(function(xhr, status, error) {
+        //     console.error('Error:', error);
+        // });
         
     }
 
     // initial table
-    getColumns();
-    getRows(currentPage);
+    // getColumns();
+    // getRows(currentPage);
 
     // "Next" rows
     $('#nextBtn').on('click', function() {
@@ -139,71 +194,81 @@ $(document).ready(function() {
     // CHART CONFIGS
     const barChart = $('#barChart');
     const pieChart = $('#pieChart');
+    const lineChart = $('#lineChart');
+
+    var barLabel = "Bar Graph";
+    var pieLabel = "Pie Chart";
+    var lineLabel = "Line Graph";
 
 
     function fillBarGraph() {
-        let barLabels = []
-        let barValues = []
+        console.log("COLUMNS: ", columns[0])
+        console.log("ROWS: ", rows)
+        //console.log("test : ", data.map(game => game.columns[0]))
+        console.log("test : ", rows.map(game => game[columns[0]]))
 
-        $.get('/get-genres', function(data) {
-            $.each(data, function(index, item) {
+        let labels = rows.map(game => game[columns[0]]);
+        let data = rows.map(game => game[columns[1]]);
 
-                if (index >= top_count) {
-                    return false;
+        new Chart(barChart, {
+            type: 'bar',
+            data: {
+            labels: labels,
+            datasets: [{
+                label: barLabel,
+                data: data,
+                borderWidth: 1
+            }]
+            },
+            options: {
+            scales: {
+                y: {
+                beginAtZero: true
                 }
+            }
+            }
+        });
 
-              barLabels.push(item.genre)
-              barValues.push(item.count)
-            });
+        new Chart(pieChart, {
+            type: 'pie',
+            data: {
+            labels: labels,
+            datasets: [{
+                label: pieLabel,
+                data: data,
+                borderWidth: 1
+            }]
+            },
+            options: {
+            scales: {
+                y: {
+                beginAtZero: true
+                }
+            }
+            }
+        });
 
-            new Chart(barChart, {
-                type: 'bar',
-                data: {
-                labels: barLabels,
-                datasets: [{
-                    label: 'Top Counts per Genre',
-                    data: barValues,
-                    borderWidth: 1
-                }]
-                },
-                options: {
-                scales: {
-                    y: {
-                    beginAtZero: true
-                    }
+        new Chart(lineChart, {
+            type: 'line',
+            data: {
+            labels: labels,
+            datasets: [{
+                label: lineLabel,
+                data: data,
+                borderWidth: 1
+            }]
+            },
+            options: {
+            scales: {
+                y: {
+                beginAtZero: true
                 }
-                }
-            });
-
-            new Chart(pieChart, {
-                type: 'pie',
-                data: {
-                labels: barLabels,
-                datasets: [{
-                    label: 'Top Counts per Genre',
-                    data: barValues,
-                    borderWidth: 1
-                }]
-                },
-                options: {
-                scales: {
-                    y: {
-                    beginAtZero: true
-                    }
-                }
-                }
-            });
-
-            
-        })
-        .fail(function(xhr, status, error) {
-            console.error('Error:', error);
+            }
+            }
         });
 
 
     }
-
-    fillBarGraph();
 
     
 

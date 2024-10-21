@@ -30,21 +30,55 @@
                 <form method="GET">
                     <label for="querySelect">Select a query:</label>
                     <select name="querySelect" id="querySelect">
-                        <option value="" selected disabled>Select a query to generate a report.</option>
+                        <option value="-1" selected disabled>Select a query to generate a report.</option>
                         <!-- Query options will be added here -->
-                         <option>Sample QUERY 1</option>
-                         <option>Sample QUERY 2</option>
+                         <option value="1">Average Video Game Prices Over Time</option>
+                         <option value="2">Sample QUERY 2</option>
                     </select>
                 </form>
+
+                <!-- <form id="query1Options" method="GET">
+                  <label for="timeRange1">Show Results By: </label>
+                    <select name="timeRange1" id="timeRange1">
+                         <option value="year">Year</option>
+                         <option value="month">Month of a Specific Years</option>
+                    </select>
+                  <label for="genre1">Compare Two Genres: </label>
+                    <select name="genre1" id="genre1">
+                      <option value="year">Year</option>
+                      <option value="month">Month of a Specific Years</option>
+                    </select>
+                    <select name="genre2" id="genre2">
+                    <select name="timeRange1" id="timeRange1">
+                      <option value="year">Year</option>
+                      <option value="month">Month of a Specific Years</option>
+                    </select>
+                </form> -->
+
               </div>
 
 
               <div id="queryTimer">
                 <h4>Progress: <span id="queryProgress">Selecting a query...</span></h4>
               </div>
+
+              <h3> Summary </h3>
+              <div id="charts" class="hideOnStart">
+                <div class="chart">
+                    <canvas id="barChart"></canvas>
+                </div>
+
+                <div class="chart">
+                    <canvas id="pieChart"></canvas>
+                </div>
+
+                <div class="chart">
+                  <canvas id="lineChart"></canvas>
+              </div>
+              </div>
               
-              <h3> Table Preview </h3>
-              <table id="queryTable">
+              <h3> Report Details </h3>
+              <table id="queryTable" class="hideOnStart">
                 <thead>
                     <tr id="tableHeaders">
                         <!-- Columns will be added here -->
@@ -55,21 +89,10 @@
                 </tbody>
               </table>
 
-              <div id="tableButtons">
+              <div id="tableButtons" class="hideOnStart">
                 <button id="prevBtn">PREV</button>
                 <div>Page <span id="currentPage">1</span></div>
                 <button id="nextBtn">NEXT</button>
-              </div>
-
-              <h3> Charts </h3>
-              <div id="charts">
-                <div class="chart">
-                    <canvas id="barChart"></canvas>
-                </div>
-
-                <div class="chart">
-                    <canvas id="pieChart"></canvas>
-                </div>
               </div>
 
 

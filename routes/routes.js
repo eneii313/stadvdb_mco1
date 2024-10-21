@@ -97,4 +97,40 @@ router.get('/get-all', (req, res) => {
 });
 
 
+router.get('/get-avg-price-all', (req, res) => {
+  const query = 
+  `SELECT YEAR(release_date) AS release_year, AVG(price) AS average_price
+  FROM games g
+  WHERE release_date IS NOT NULL
+  GROUP BY release_year
+  ORDER BY release_year ASC;`
+
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database query failed' });
+    }
+
+      res.json({ columns: ['release_year', 'average_price'] , rows: results});
+
+  });
+});
+
+router.get('/get-avg-price-genre', (req, res) => {
+  const query = 
+  `SELECT YEAR(release_date) AS release_year, AVG(price) AS average_price
+  FROM games g
+  WHERE release_date IS NOT NULL
+  GROUP BY release_year
+  ORDER BY release_year ASC;`
+
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database query failed' });
+    }
+
+      res.json({ columns: ['release_year', 'average_price'] , rows: results});
+
+  });
+});
+
 module.exports = router;
