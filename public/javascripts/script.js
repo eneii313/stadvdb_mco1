@@ -1,5 +1,5 @@
 
-const {getAveragePriceAll, getAveragePriceGenre, getAveragePriceYear} = require('./queryOne')
+import {getAveragePriceAll, getAveragePriceGenre, getAveragePriceYear} from './queryOne.js';
 
 $(document).ready(function() {
 
@@ -32,6 +32,7 @@ $(document).ready(function() {
 
     $('#querySelect').on('change', function() {
         currentPage = 1;
+        $("#currentPage").text(currentPage);
         $('#options').hide();
         $("#option").val("all");
         $("#prevBtn").prop("disabled", true );
@@ -96,21 +97,22 @@ $(document).ready(function() {
 
 });
 
-var columns = []
-var rows = []
+$.columns = []
+$.rows = []
+
 var currentPage = 1;
 const row_limit = 15;
 
 // use for timing queries
 var startTime = 0;
-function startTimer() {
+export function startTimer() {
     $(".hideOnStart").hide();
     $("#charts").empty();
     $("#queryProgress").text("Generating query report...");
     startTime = performance.now();
 }
 
-function endTimer() {
+export function endTimer() {
     let endTime = performance.now();
     let timeTaken = ((endTime - startTime) / 1000).toFixed(2); // Time in seconds
 
@@ -120,18 +122,18 @@ function endTimer() {
 
 // ---------------------------- TABLE FUNCTIONS ---------------------------- 
 // show the resulting query table rows by increments of row_limit
-function getRows(page) {        
+export function getRows(page) {        
     $('#tableBody').empty();
 
     // Generate table rows
     let startIndex = (page - 1) * row_limit;
-    let endIndex = Math.min(startIndex + row_limit, rows.length);
+    let endIndex = Math.min(startIndex + row_limit, $.rows.length);
 
-    for (i = startIndex; i < endIndex; i++) {
+    for (let i = startIndex; i < endIndex; i++) {
         let rowHtml = '<tr>';
 
-        for (j = 0; j < columns.length; j++) {
-            let cellValue = rows[i][columns[j]];
+        for (let j = 0; j < $.columns.length; j++) {
+            let cellValue = $.rows[i][$.columns[j]];
             if (cellValue === null)
                 cellValue = "-"
             rowHtml += `<td>`+cellValue+`</td>`;
@@ -150,7 +152,7 @@ function getRows(page) {
 
 // ---------------------------- CHART FUNCTIONS & CONFIGS ---------------------------- 
 
-function createChart (chartType, chartName, data, options) {
+export function createChart (chartType, chartName, data, options) {
 
     let chartDiv = document.createElement('div');
     chartDiv.classList.add('chart');
@@ -170,5 +172,3 @@ function createChart (chartType, chartName, data, options) {
     });
 
 }
-
-module.exports = {startTimer, endTimer, getRows, createChart}

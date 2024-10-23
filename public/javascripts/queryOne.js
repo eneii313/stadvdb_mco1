@@ -1,33 +1,33 @@
-const { startTimer, endTimer, getRows, createChart } = require('./script');
+import { startTimer, endTimer, getRows, createChart } from './script.js';
 
 // ---------------------------- QUERY 1: Average Video Game Prices Over Time ----------------------------     
-function getAveragePriceAll() {
+export function getAveragePriceAll() {
     startTimer(); 
     
     $.get('/get-avg-price-rollup', function(data) {
-        columns = data.columns
-        rows = data.rows
+        $.columns = data.columns
+        $.rows = data.rows
         
         $('#tableHeaders').empty();
 
         // Generate table headers
-        $.each(columns, function(index, col) {
+        $.each($.columns, function(index, col) {
             $('#tableHeaders').append(`<th>`+col+`</th>`);
         });
 
         // Generate first table rows
-        getRows(currentPage);
+        getRows(1);
 
         
         //  GENERATE SUMMARY
         var yearArray = [];
-        var highestYear = rows[0];
+        var highestYear = $.rows[0];
 
         $("#title1").text("All Time Average Game Price");
         $("#title2").text("Last Year Average");
         $("#title3").text("Highest Average Year");
 
-        rows.forEach(row => {
+        $.rows.forEach(row => {
             // overall average price
             if (row.release_year === null) {
                 $("#value1").text(row.average_price);
@@ -119,32 +119,32 @@ function getAveragePriceAll() {
 }
 
 
-function getAveragePriceGenre(genre) {
+export function getAveragePriceGenre(genre) {
     startTimer(); 
     
     $.get('/get-avg-price-slice', {genre: genre}, function(data) {
-        columns = data.columns
-        rows = data.rows
+        $.columns = data.columns
+        $.rows = data.rows
         
         $('#tableHeaders').empty();
 
         // Generate table headers
-        $.each(columns, function(index, col) {
+        $.each($.columns, function(index, col) {
             $('#tableHeaders').append(`<th>`+col+`</th>`);
         });
 
         // Generate first table rows
-        getRows(currentPage);
+        getRows(1);
 
         
         //  GENERATE SUMMARY
-        var highestYear = rows[0];
+        var highestYear = $.rows[0];
 
         $("#title1").text("All Time Average Game Price");
         $("#title2").text("Last Year Average");
         $("#title3").text("Highest Average Year");
 
-        rows.forEach(row => {
+        $.rows.forEach(row => {
             if (row.release_year == 2024) {
                 $("#value2").text(row.release_year + " - " + row.average_price);
             }
@@ -156,14 +156,14 @@ function getAveragePriceGenre(genre) {
         $("#value3").text(highestYear.release_year + " - " + highestYear.average_price);
 
         // generate charts
-        var average_price = rows.map(item => item.average_price).map(Number);
-        var game_count = rows.map(item => item.game_count);
+        var average_price = $.rows.map(item => item.average_price).map(Number);
+        var game_count = $.rows.map(item => item.game_count);
 
         var total = average_price.reduce((sum, value) => sum + value, 0)
-        $("#value1").text((total / rows.length).toFixed(2));
+        $("#value1").text((total / $.rows.length).toFixed(2));
 
         var data = {
-            labels: rows.map(item => item.release_year),
+            labels: $.rows.map(item => item.release_year),
             datasets: [
                 {
                 label: 'Average Price',
@@ -224,24 +224,24 @@ function getAveragePriceGenre(genre) {
     });
 }
 
-function getAveragePriceYear(year) {
+export function getAveragePriceYear(year) {
     startTimer();
 
     var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     
     $.get('/get-avg-price-drilldown', {year: year}, function(data) {
-        columns = data.columns
-        rows = data.rows
+        $.columns = data.columns
+        $.rows = data.rows
         
         $('#tableHeaders').empty();
 
         // Generate table headers
-        $.each(columns, function(index, col) {
+        $.each($.columns, function(index, col) {
             $('#tableHeaders').append(`<th>`+col+`</th>`);
         });
 
         // Generate first table rows
-        getRows(currentPage);
+        getRows(1);
 
         $("#title1").text(year + " Average Price");
         $("#title2").text("Month with Highest Average Price");
@@ -249,11 +249,11 @@ function getAveragePriceYear(year) {
 
         
         //  GENERATE SUMMARY
-        var highestYear = rows[0];
-        var highestCount = rows[0];
+        var highestYear = $.rows[0];
+        var highestCount = $.rows[0];
 
 
-        rows.forEach(row => {
+        $.rows.forEach(row => {
             if (parseFloat(row.average_price) > parseFloat(highestYear.average_price)){
                 highestYear = row;
             }
@@ -272,7 +272,7 @@ function getAveragePriceYear(year) {
             game_count: 0
         }));
 
-        rows.forEach(item => {
+        $.rows.forEach(item => {
             fullYear[item.release_month - 1].average_price = item.average_price;
             fullYear[item.release_month - 1].game_count = item.game_count;
         });
@@ -282,7 +282,7 @@ function getAveragePriceYear(year) {
             var game_count = fullYear.map(item => item.game_count);
 
         var total = average_price.reduce((sum, value) => sum + value, 0)
-        $("#value1").text((total / rows.length).toFixed(2));
+        $("#value1").text((total / $.rows.length).toFixed(2));
 
         var data = {
             labels: months,
@@ -345,5 +345,3 @@ function getAveragePriceYear(year) {
         console.error('Error:', error);
     });
 }
-
-module.exports = {getAveragePriceAll, getAveragePriceGenre, getAveragePriceYear}
