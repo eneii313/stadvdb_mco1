@@ -21,10 +21,13 @@ h1 {
 #query {
     background-color: #f0f0f0;
     width: 100%;
+    padding: 10px;
 }
 
 #queryProgress {
-    font-weight: normal;
+    font-weight: normal
+    
+    ;
     font-style: italic;
 }
 
@@ -34,8 +37,11 @@ label {
     margin: 0 10px;
 }
 
+#q1Options label {
+    font-size: 1em;
+}
+
 select {
-    margin-top: 10px;
     width: min-content;
 }
 
@@ -102,17 +108,37 @@ label, select {
 
 #charts {
     display: flex;
+    flex-wrap: wrap;
 }
 
 .chart{
     background-color: #f0f0f0;
-    flex: 1;
+    flex: 1 1 45%;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
     max-height: 500px;
     padding: 2px;
     margin: 6px;
+}
+
+.rowSummary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; 
+}
+
+.colSummary {
+    background-color: #f0f0f0;
+    padding: 20px;
+    width: 30%;            
+    text-align: center;
+}
+
+.colSummary h3, 
+.colSummary h4 {
+    margin: 2px;
 }
 
 footer {

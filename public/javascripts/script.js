@@ -1,171 +1,74 @@
 
+const {getAveragePriceAll, getAveragePriceGenre, getAveragePriceYear} = require('./queryOne')
+
 $(document).ready(function() {
 
-    // $.get('/get-options', function(data) {
-    //     // console.log("SUCCESS getting options");
+    $.get('/get-genres', function(data) {
 
-    //     const $select = $('#optionSelect');
+        // create <option> elements and append them to <select>
+        $.each(data, function(index, item) {
+            $('#genreSelect').append(`<option value="${item.genre}">${item.genre}</option>`);
+        });
+    })
+    .fail(function(xhr, status, error) {
+        console.error('Error:', error);
+    });
 
-    //     $select.empty();
+    $.get('/get-years', function(data) {
 
-    //     // create <option> elements and append them to <select>
-    //     $.each(data, function(index, item) {
-    //       $select.append(`<option value="${item.tag_name}">${item.tag_name}</option>`);
-    //     });
-    // })
-    // .fail(function(xhr, status, error) {
-    //     console.error('Error:', error);
-    // });
-
-    var columns = []
-    var rows = []
-    var currentPage = 1;
-    const limit = 10;
-    const top_count = 10;
-
-    // hide table and charts on startup
-    $(".hideOnStart").hide();
-
-    $('#querySelect').on('change', function() {
-        currentPage = 1;
-        generateReport($('#querySelect').val());
+        // create <option> elements and append them to <select>
+        $.each(data, function(index, item) {
+            $('#yearSelect').append(`<option value="${item.release_year}">${item.release_year}</option>`);
+        });
+    })
+    .fail(function(xhr, status, error) {
+        console.error('Error:', error);
     });
 
 
-    function generateReport(queryNum) {
-        var queryRoute = "";
-        switch (queryNum) {
-            case "1": 
-                queryRoute = "/get-avg-price-all";
+    // hide table and charts on startup
+    $(".hideOnStart").hide();
+    $("#options").hide();
+
+    $('#querySelect').on('change', function() {
+        currentPage = 1;
+        $('#options').hide();
+        $("#option").val("all");
+        $("#prevBtn").prop("disabled", true );
+
+        // generate report base on selected query
+        switch ($('#querySelect').val()) { 
+            case "1":
+                getAveragePriceAll();
                 break;
             default: 
                 console.log("Invalid query number.");
                 return;
-        } 
 
-        $("#queryProgress").text("Generating query report...");
-        let startTime = performance.now();
-       
-        callSQLQuery(queryRoute, function() {
-            let endTime = performance.now();
-            let timeTaken = ((endTime - startTime) / 1000).toFixed(2); // Time in seconds
-
-            $("#queryProgress").text("Report finished. Time taken: " + timeTaken + " seconds");
-            $(".hideOnStart").show();
-        });
-    }
-
-    function callSQLQuery(queryRoute, callback) {
-        $.get(queryRoute, function(data) {
-            columns = data.columns
-            rows = data.rows
-            
-            $('#tableHeaders').empty();
-    
-            // Generate table headers
-            $.each(columns, function(index, col) {
-                $('#tableHeaders').append(`<th>`+col+`</th>`);
-            });
-
-            // generate first 10 rows
-            getRows(currentPage);
-            // generate charts
-            fillBarGraph();
-
-            callback();
-    
-        })
-        .fail(function(xhr, status, error) {
-            console.error('Error:', error);
-            callback();
-        });
-    }
-
-    $("#prevBtn").prop("disabled", true );
-
-    function getColumns() {
-        columns = []
-
-        $.get('/get-columns', function(data) {
-    
-            let cols = data.columns;
-
-            $('#tableHeaders').empty();
-    
-            // Generate table headers
-            $.each(cols, function(index, col) {
-                $('#tableHeaders').append(`<th>${col.COLUMN_NAME}</th>`);
-                columns.push(col.COLUMN_NAME);
-            });
-    
-        })
-        .fail(function(xhr, status, error) {
-            console.error('Error:', error);
-        });
-    }
-
-
-    function getRows(page) {
-        let counter = 0;
-        let stopLoop = false;
-        
-        $('#tableBody').empty();
-    
-        // Generate table rows
-        $.each(rows, function(index, row) {
-            if (stopLoop) return false;
-            let rowHtml = '<tr>';
-            $.each(columns, function(i) {
-                let cellValue = row[columns[i]];
-                if (cellValue === null)
-                    cellValue = "-"
-
-                rowHtml += `<td>`+cellValue+`</td>`;
-            });
-            rowHtml += '</tr>';
-            $('#tableBody').append(rowHtml);
-
-            counter++;
-            if (counter == limit) {
-                stopLoop = true;
-            }
-        });
-
-
-        if (rows.length < limit) {
-            $("#nextBtn").prop("disabled", true );
         }
-        
-        // $.get('/get-rows', {page: page, limit: limit}, function(data) {
-    
-        //     let rows = data.rows;
+    });
 
-        //     $('#tableBody').empty();
-    
-        //     // Generate table rows
-        //     $.each(rows, function(index, row) {
-        //         let rowHtml = '<tr>';
-        //         $.each(columns, function(i) {
-        //             rowHtml += `<td>${row[columns[i]]}</td>`;
-        //         });
-        //         rowHtml += '</tr>';
-        //         $('#tableBody').append(rowHtml);
-        //     });
+    $('.option').on('change', function() {
+        currentPage = 1;
+        $("#prevBtn").prop("disabled", true );
 
-        //     if (rows.length < limit) {
-        //         $("#nextBtn").prop("disabled", true );
-        //     }
-    
-        // })
-        // .fail(function(xhr, status, error) {
-        //     console.error('Error:', error);
-        // });
-        
-    }
+        // generate report base on selected query
+        var query = $("#querySelect").val();
+        var genre = $("#genreSelect").val();
+        var year = $("#yearSelect").val();
 
-    // initial table
-    // getColumns();
-    // getRows(currentPage);
+        switch (query) {
+            case "1":
+                if (genre == "all" && year == "all")
+                    getAveragePriceAll();
+                else if (genre != "all" && year == "all")
+                    getAveragePriceGenre(genre);
+                else if (genre == "all" && year != "all")
+                    getAveragePriceYear(year);
+        }
+
+    });
+
 
     // "Next" rows
     $('#nextBtn').on('click', function() {
@@ -190,90 +93,82 @@ $(document).ready(function() {
         }
     });
 
-    
-    // CHART CONFIGS
-    const barChart = $('#barChart');
-    const pieChart = $('#pieChart');
-    const lineChart = $('#lineChart');
 
-    var barLabel = "Bar Graph";
-    var pieLabel = "Pie Chart";
-    var lineLabel = "Line Graph";
+});
 
+var columns = []
+var rows = []
+var currentPage = 1;
+const row_limit = 15;
 
-    function fillBarGraph() {
-        console.log("COLUMNS: ", columns[0])
-        console.log("ROWS: ", rows)
-        //console.log("test : ", data.map(game => game.columns[0]))
-        console.log("test : ", rows.map(game => game[columns[0]]))
+// use for timing queries
+var startTime = 0;
+function startTimer() {
+    $(".hideOnStart").hide();
+    $("#charts").empty();
+    $("#queryProgress").text("Generating query report...");
+    startTime = performance.now();
+}
 
-        let labels = rows.map(game => game[columns[0]]);
-        let data = rows.map(game => game[columns[1]]);
+function endTimer() {
+    let endTime = performance.now();
+    let timeTaken = ((endTime - startTime) / 1000).toFixed(2); // Time in seconds
 
-        new Chart(barChart, {
-            type: 'bar',
-            data: {
-            labels: labels,
-            datasets: [{
-                label: barLabel,
-                data: data,
-                borderWidth: 1
-            }]
-            },
-            options: {
-            scales: {
-                y: {
-                beginAtZero: true
-                }
-            }
-            }
-        });
+    $("#queryProgress").text("Report finished. Time taken: " + timeTaken + " seconds");
+    $(".hideOnStart").show();
+}
 
-        new Chart(pieChart, {
-            type: 'pie',
-            data: {
-            labels: labels,
-            datasets: [{
-                label: pieLabel,
-                data: data,
-                borderWidth: 1
-            }]
-            },
-            options: {
-            scales: {
-                y: {
-                beginAtZero: true
-                }
-            }
-            }
-        });
+// ---------------------------- TABLE FUNCTIONS ---------------------------- 
+// show the resulting query table rows by increments of row_limit
+function getRows(page) {        
+    $('#tableBody').empty();
 
-        new Chart(lineChart, {
-            type: 'line',
-            data: {
-            labels: labels,
-            datasets: [{
-                label: lineLabel,
-                data: data,
-                borderWidth: 1
-            }]
-            },
-            options: {
-            scales: {
-                y: {
-                beginAtZero: true
-                }
-            }
-            }
-        });
+    // Generate table rows
+    let startIndex = (page - 1) * row_limit;
+    let endIndex = Math.min(startIndex + row_limit, rows.length);
 
+    for (i = startIndex; i < endIndex; i++) {
+        let rowHtml = '<tr>';
 
+        for (j = 0; j < columns.length; j++) {
+            let cellValue = rows[i][columns[j]];
+            if (cellValue === null)
+                cellValue = "-"
+            rowHtml += `<td>`+cellValue+`</td>`;
+        }
+
+        rowHtml += '</tr>';
+        $('#tableBody').append(rowHtml);
+    }
+
+    if (endIndex % row_limit != 0 || startIndex == endIndex) {
+        $("#nextBtn").prop("disabled", true );
     }
 
     
+}
 
+// ---------------------------- CHART FUNCTIONS & CONFIGS ---------------------------- 
 
-    
+function createChart (chartType, chartName, data, options) {
 
+    let chartDiv = document.createElement('div');
+    chartDiv.classList.add('chart');
 
-});
+    let canvas = document.createElement('canvas');
+    canvas.id = chartName;
+    chartDiv.appendChild(canvas); // Append canvas to div
+
+    document.getElementById('charts').appendChild(chartDiv);
+
+    let ctx = canvas.getContext('2d');
+
+    new Chart(ctx, {
+        type: chartType,
+        data: data,
+        options: options,
+    });
+
+}
+
+module.exports = {startTimer, endTimer, getRows, createChart}

@@ -20,9 +20,10 @@ db.connect(function(err) {
 });
 
 // ------------------------------------------------ QUERIES ------------------------------------------------
-router.get('/get-options', (req, res) => {
+router.get('/get-genres', (req, res) => {
 
-    const query = 'SELECT DISTINCT tag_name FROM supplies_order_item_tags;';
+    const query = `SELECT DISTINCT genre FROM game_genres
+                    ORDER BY genre ASC;`;
 
     db.query(query, (err, results) => {
       if (err) {
@@ -34,101 +35,92 @@ router.get('/get-options', (req, res) => {
     });
 });
 
-router.get('/get-columns', (req, res) => {
-  const query = `SELECT COLUMN_NAME
-                  FROM INFORMATION_SCHEMA.COLUMNS
-                  WHERE TABLE_NAME = 'games'
-                  ORDER BY ORDINAL_POSITION;`;
+router.get('/get-years', (req, res) => {
+
+  const query = `SELECT DISTINCT YEAR(release_date) AS release_year FROM games
+                  WHERE release_date IS NOT NULL
+                  ORDER BY release_year ASC;`;
 
   db.query(query, (err, results) => {
     if (err) {
-      return res.status(500).json({ error: 'Database query for attributes failed' });
-    }
-
-      res.json({ columns: results});
-
-  });
-});
-
-
-router.get('/get-rows', (req, res) => {
-
-  let page = parseInt(req.query.page) || 1;  // current page
-  let limit = parseInt(req.query.limit) || 10;  // rows per page
-  let offset = (page - 1) * limit;  // offset for SQL query
-        
-  const query = 'SELECT * FROM games LIMIT ? OFFSET ?;';
-
-  db.query(query, [limit, offset], (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: 'Database query for rows failed' });
-    }
-
-    res.json({ rows: results, page: page, limit: limit });
-  });
-});
-
-router.get('/get-genres', (req, res) => {
-
-  const query = `SELECT genre, COUNT(*) AS count FROM  game_genres
-                  GROUP BY genre 
-                  ORDER BY count DESC;`
-
-  db.query(query, (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: 'Database query for customers per location failed' });
+      return res.status(500).json({ error: 'Database query failed' });
     }
 
     res.json(results);
-  });
-});
-
-router.get('/get-all', (req, res) => {
-  const query = `SELECT * FROM games`;
-
-  db.query(query, (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: 'Database query failed' });
-    }
-
-      res.json({ columns: results});
 
   });
 });
 
 
-router.get('/get-avg-price-all', (req, res) => {
+router.get('/get-avg-price-rollup', (req, res) => {
   const query = 
-  `SELECT YEAR(release_date) AS release_year, AVG(price) AS average_price
-  FROM games g
-  WHERE release_date IS NOT NULL
-  GROUP BY release_year
-  ORDER BY release_year ASC;`
+     `SELECT 	YEAR(release_date) AS release_year, 
+			        Ifnull(genre, 'YEAR AVE') AS genre, 
+			        ROUND(AVG(price), 2) AS average_price,
+              COUNT(g.appid) AS game_count
+      FROM		games g
+      JOIN 		game_genres gg
+      ON			g.AppID = gg.AppID
+      WHERE 	release_date IS NOT NULL
+      AND			NOT YEAR(release_date) = 2025
+      GROUP BY 	release_year, genre WITH ROLLUP
+      ORDER BY 	release_year, genre ASC;`
 
   db.query(query, (err, results) => {
     if (err) {
       return res.status(500).json({ error: 'Database query failed' });
     }
 
-      res.json({ columns: ['release_year', 'average_price'] , rows: results});
+      res.json({ columns: ['release_year', 'genre','average_price', 'game_count'] , rows: results});
 
   });
 });
 
-router.get('/get-avg-price-genre', (req, res) => {
-  const query = 
-  `SELECT YEAR(release_date) AS release_year, AVG(price) AS average_price
-  FROM games g
-  WHERE release_date IS NOT NULL
-  GROUP BY release_year
-  ORDER BY release_year ASC;`
 
-  db.query(query, (err, results) => {
+router.get('/get-avg-price-drilldown', (req, res) => {
+  var year = req.query.year;
+  const query = 
+     `SELECT  MONTH(release_date) AS release_month,
+              ROUND(AVG(price), 2) AS average_price,
+              COUNT(g.appid) AS game_count
+      FROM games g
+      JOIN game_genres gg on g.AppID = gg.AppID
+      WHERE YEAR(release_date) = ?
+      GROUP BY release_month
+      ORDER BY release_month ASC;`
+
+  db.query(query, [year], (err, results) => {
     if (err) {
       return res.status(500).json({ error: 'Database query failed' });
     }
 
-      res.json({ columns: ['release_year', 'average_price'] , rows: results});
+      res.json({ columns: ['release_month','average_price', 'game_count'] , rows: results});
+
+  });
+});
+
+router.get('/get-avg-price-slice', (req, res) => {
+  var genre = req.query.genre;
+
+  console.log("GENRE: ", genre);
+
+  const query = 
+  `SELECT 	YEAR(release_date) AS release_year, 
+		ROUND(AVG(price), 2) AS average_price,
+		COUNT(g.appid) AS game_count
+    FROM 	games g
+    JOIN 	game_genres gg on g.AppID = gg.AppID
+    WHERE 	genre = ?
+    AND			NOT YEAR(release_date) = 2025
+    GROUP BY release_year
+    ORDER BY release_year;`
+
+  db.query(query, [genre], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database query failed' });
+    }
+
+      res.json({ columns: ['release_year', 'average_price', 'game_count'] , rows: results});
 
   });
 });

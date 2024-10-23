@@ -8,14 +8,15 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
-        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
         <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
         
         <link rel="stylesheet" href="/css/global.css">
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script defer src="/javascripts/script.js" ></script>
+        <script defer src="/javascripts/queryOne.js" ></script>
 
         <title>MCO1</title>
 
@@ -23,7 +24,7 @@
     <body>
         <div id="page-container">
             <div id="main">
-              <h1><i class="icon-gamepad fa-4x"></i> Steam Games Dashboard</h1>
+              <h1><i class="icon-gamepad"></i> Steam Games Dashboard</h1>
               <hr>
             
               <div id="query">
@@ -32,18 +33,25 @@
                     <select name="querySelect" id="querySelect">
                         <option value="-1" selected disabled>Select a query to generate a report.</option>
                         <!-- Query options will be added here -->
-                         <option value="1">Average Video Game Prices Over Time</option>
+                         <option value="1">Average Video Game Prices Over Time Per Genre</option>
                          <option value="2">Sample QUERY 2</option>
                     </select>
                 </form>
 
-                <!-- <form id="query1Options" method="GET">
-                  <label for="timeRange1">Show Results By: </label>
-                    <select name="timeRange1" id="timeRange1">
-                         <option value="year">Year</option>
-                         <option value="month">Month of a Specific Years</option>
+                <form id="options" method="GET">
+                  <br />
+                  <label for="genreSelect">Select Genre: </label>
+                    <select name="genreSelect" id="genreSelect" class="option">
+                         <option value="all">All Genres</option>
+                         <!-- all genres will show here -->
                     </select>
-                  <label for="genre1">Compare Two Genres: </label>
+
+                    <label for="yearSelect">Select Year: </label>
+                    <select name="yearSelect" id="yearSelect" class="option">
+                         <option value="all">All Time</option>
+                         <!-- all genres will show here -->
+                    </select>
+                  <!-- <label for="genre1">Compare Two Genres: </label>
                     <select name="genre1" id="genre1">
                       <option value="year">Year</option>
                       <option value="month">Month of a Specific Years</option>
@@ -52,8 +60,8 @@
                     <select name="timeRange1" id="timeRange1">
                       <option value="year">Year</option>
                       <option value="month">Month of a Specific Years</option>
-                    </select>
-                </form> -->
+                    </select> -->
+                </form>
 
               </div>
 
@@ -63,18 +71,34 @@
               </div>
 
               <h3> Summary </h3>
-              <div id="charts" class="hideOnStart">
-                <div class="chart">
-                    <canvas id="barChart"></canvas>
+
+              <div id="summary" class="rowSummary hideOnStart">
+
+                <div id="colSummary1" class="colSummary">
+                    <i class="fa fa-star fa-2x"></i>
+                    <h4 id="title1">All Time Average Game Price</h4>
+                    <h3 id="value1">0.00</h3>
                 </div>
 
-                <div class="chart">
-                    <canvas id="pieChart"></canvas>
-                </div>
-
-                <div class="chart">
-                  <canvas id="lineChart"></canvas>
+                <div id="colSummary2" class="colSummary">
+                  <i class="fa fa-star fa-2x"></i>
+                  <h4 id="title2">Average Last Year</h4>
+                  <h3 id="value2">2024 - 0.00</h3>
               </div>
+
+              <div id="colSummary3" class="colSummary">
+                <i class="fa fa-star fa-2x" aria-hidden="true"></i>
+                <h4 id="title3">Highest Average Year</h4>
+                <h3 id="value3">Year - 0.00</h3>
+            </div>
+              </div>
+
+
+              <br />
+
+
+              <div id="charts" class="hideOnStart">
+                <!-- Charts will be added here -->
               </div>
               
               <h3> Report Details </h3>
