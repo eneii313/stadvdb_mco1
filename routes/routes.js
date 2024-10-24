@@ -80,14 +80,14 @@ router.get('/get-avg-price-rollup', (req, res) => {
 router.get('/get-avg-price-drilldown', (req, res) => {
   var year = req.query.year;
   const query = 
-     `SELECT  MONTH(release_date) AS release_month,
-              ROUND(AVG(price), 2) AS average_price,
-              COUNT(g.appid) AS game_count
-      FROM games g
-      JOIN game_genres gg on g.AppID = gg.AppID
-      WHERE YEAR(release_date) = ?
-      GROUP BY release_month
-      ORDER BY release_month ASC;`
+  `SELECT  MONTH(release_date) AS release_month,
+          ROUND(AVG(price), 2) AS average_price,
+          COUNT(g.appid) AS game_count
+    FROM games g
+    JOIN game_genres gg on g.AppID = gg.AppID
+    WHERE YEAR(release_date) = ?
+    GROUP BY release_month
+    ORDER BY release_month ASC;`
 
   db.query(query, [year], (err, results) => {
     if (err) {
@@ -101,13 +101,10 @@ router.get('/get-avg-price-drilldown', (req, res) => {
 
 router.get('/get-avg-price-slice', (req, res) => {
   var genre = req.query.genre;
-
-  console.log("GENRE: ", genre);
-
   const query = 
   `SELECT 	YEAR(release_date) AS release_year, 
-		ROUND(AVG(price), 2) AS average_price,
-		COUNT(g.appid) AS game_count
+            ROUND(AVG(price), 2) AS average_price,
+            COUNT(g.appid) AS game_count
     FROM 	games g
     JOIN 	game_genres gg on g.AppID = gg.AppID
     WHERE 	genre = ?
@@ -116,6 +113,29 @@ router.get('/get-avg-price-slice', (req, res) => {
     ORDER BY release_year;`
 
   db.query(query, [genre], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database query failed' });
+    }
+
+      res.json({ columns: ['release_year', 'average_price', 'game_count'] , rows: results});
+
+  });
+});
+
+router.get('/get-avg-price-dice', (req, res) => {
+  var year = req.query.year;
+  var genre = req.query.genre;
+  const query = 
+  `SELECT MONTH(release_date) AS release_month, 
+           ROUND(AVG(price), 2) AS average_price,
+           COUNT(g.appid) AS game_count
+    FROM games g
+    JOIN game_genres gg on g.AppID = gg.AppID
+    WHERE YEAR(release_date) = ? AND genre = ?
+    GROUP BY release_month
+    ORDER BY release_month;`
+
+  db.query(query, [year, genre], (err, results) => {
     if (err) {
       return res.status(500).json({ error: 'Database query failed' });
     }

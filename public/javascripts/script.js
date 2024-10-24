@@ -1,5 +1,5 @@
 
-import {getAveragePriceAll, getAveragePriceGenre, getAveragePriceYear} from './queryOne.js';
+import {getAveragePriceAll, getAveragePriceGenre, getAveragePriceYear, getAveragePriceGenreOnYear} from './queryOne.js';
 
 $(document).ready(function() {
 
@@ -66,6 +66,8 @@ $(document).ready(function() {
                     getAveragePriceGenre(genre);
                 else if (genre == "all" && year != "all")
                     getAveragePriceYear(year);
+                else if (genre != "all" && year != "all")
+                    getAveragePriceGenreOnYear(genre, year);
         }
 
     });
