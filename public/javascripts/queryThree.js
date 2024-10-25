@@ -1,16 +1,16 @@
 import { startTimer, endTimer, getRows, createChart } from './script.js';
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const colorArray = [ "#03045e","#0077b6","#00b4d8","#90e0ef","#caf0f8"];
+const colorArray = [ "#0d5b11","#187c19","#69b41e","#8dc71e","#b8d53d"];
 var colorIndex = 0;
 
-export function getAudioSupportAll() {
+export function getTextSupportAll() {
     startTimer(); 
     colorIndex = 0;
     var yearArray = []; // language, year, count
     var languageArray = []; // language, total count
     
-    $.get('/get-audio-support-rollup', function(data) {
+    $.get('/get-text-support-rollup', function(data) {
         $.columns = data.columns
         $.rows = data.rows
         
@@ -34,15 +34,16 @@ export function getAudioSupportAll() {
         var mostSupportedLanguage = {game_count: -1};
         var secondSupportedLanguage = {game_count: -1};
 
-        $("#title1").text("Total Audio Support Across All Languages");
+        $("#title1").text("Total Text Support Across All Languages");
         $("#title2").text("Most Supported Language");
         $("#title3").text("Second Most Supported Language");
 
         $.rows.forEach(row => {
             if (row.release_year === null) {
-                if (row.fullaudio_language == "GRAND TOTAL")
+                if (row.supported_language === null)
                     $("#value1").text(row.game_count);
                 else {
+                    console.log("Pushing " + row.supported_language);
                     let { release_year, ...newRow } = row;
                     languageArray.push(newRow);
 
@@ -57,8 +58,8 @@ export function getAudioSupportAll() {
             else yearArray.push(row);
         });
 
-        $("#value2").text(mostSupportedLanguage.fullaudio_language + " - " + mostSupportedLanguage.game_count);
-        $("#value3").text(secondSupportedLanguage.fullaudio_language + " - " + secondSupportedLanguage.game_count);
+        $("#value2").text(mostSupportedLanguage.supported_language + " - " + mostSupportedLanguage.game_count);
+        $("#value3").text(secondSupportedLanguage.supported_language + " - " + secondSupportedLanguage.game_count);
     
 
         // generate charts
@@ -84,7 +85,7 @@ export function getAudioSupportAll() {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Total Game Count with Audio Support by Language'
+                    text: 'Total Game Count with Text Support by Language'
                 }
              },
 
@@ -110,7 +111,7 @@ export function getAudioSupportAll() {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Total Game Count with Audio Support by Language by Year'
+                    text: 'Total Game Count with Text Support by Language by Year'
                 }
              },
 
@@ -125,16 +126,16 @@ export function getAudioSupportAll() {
                 const labels = chartAll.data.labels;
                 const dataset = chartAll.data.datasets[0].data;
 
-                const languageIndex = labels.indexOf(row.fullaudio_language);
+                const languageIndex = labels.indexOf(row.supported_language);
                 
                 if (languageIndex == -1) {
-                    labels.push(row.fullaudio_language);
+                    labels.push(row.supported_language);
                     dataset.push(row.game_count);
 
                     // Create a new data array initialized to 0 for each year in chartYear's labels
                     const yearData = chartYear.data.labels.map(yearLabel => {
                         const match = yearArray.find(item => 
-                            item.fullaudio_language === row.fullaudio_language &&
+                            item.supported_language === row.supported_language &&
                             parseInt(item.release_year) === parseInt(yearLabel)
                         );
                         return match ? match.game_count : 0;
@@ -142,7 +143,7 @@ export function getAudioSupportAll() {
 
                     // Push a new dataset for this language in chartYear
                     chartYear.data.datasets.push({
-                        label: row.fullaudio_language,
+                        label: row.supported_language,
                         backgroundColor: colorArray[colorIndex],
                         data: yearData
                     });
@@ -154,7 +155,7 @@ export function getAudioSupportAll() {
                     dataset.splice(languageIndex, 1);
 
                     // Remove data from chartYear
-                    const datasetIndex = chartYear.data.datasets.findIndex(ds => ds.label === row.fullaudio_language);
+                    const datasetIndex = chartYear.data.datasets.findIndex(ds => ds.label === row.supported_language);
                     if (datasetIndex !== -1) {
                         chartYear.data.datasets.splice(datasetIndex, 1);
                     }
@@ -210,7 +211,7 @@ export function getAudioSupportYear(year) {
 
         $.rows.forEach(row => {
             if (row.release_month === null) {
-                if (row.fullaudio_language === null)
+                if (row.supported_language === null)
                     $("#value1").text(row.game_count);
                 else {
                     let { release_month, ...newRow } = row;
@@ -226,8 +227,8 @@ export function getAudioSupportYear(year) {
             else monthArray.push(row);
         });
 
-        $("#value2").text(mostSupportedLanguage.fullaudio_language + " - " + mostSupportedLanguage.game_count);
-        $("#value3").text(secondSupportedLanguage.fullaudio_language + " - " + secondSupportedLanguage.game_count);
+        $("#value2").text(mostSupportedLanguage.supported_language + " - " + mostSupportedLanguage.game_count);
+        $("#value3").text(secondSupportedLanguage.supported_language + " - " + secondSupportedLanguage.game_count);
     
 
         // generate charts
@@ -293,16 +294,16 @@ export function getAudioSupportYear(year) {
             const labels = chartAll.data.labels;
             const dataset = chartAll.data.datasets[0].data;
 
-            const languageIndex = labels.indexOf(row.fullaudio_language);
+            const languageIndex = labels.indexOf(row.supported_language);
             
             if (languageIndex == -1) {
-                labels.push(row.fullaudio_language);
+                labels.push(row.supported_language);
                 dataset.push(row.game_count);
 
                 // Create a new data array initialized to 0 for each month
                 const monthData = chartMonth.data.labels.map(monthLabel => {
                     const match = monthArray.find(item => 
-                        item.fullaudio_language === row.fullaudio_language &&
+                        item.supported_language === row.supported_language &&
                         parseInt(item.release_month) === months.indexOf(monthLabel)
                     );
                     return match ? match.game_count : 0;
@@ -310,7 +311,7 @@ export function getAudioSupportYear(year) {
 
                 // Push a new dataset for this language in chartMonth
                 chartMonth.data.datasets.push({
-                    label: row.fullaudio_language,
+                    label: row.supported_language,
                     backgroundColor: colorArray[colorIndex],
                     data: monthData
                 });
@@ -322,7 +323,7 @@ export function getAudioSupportYear(year) {
                 dataset.splice(languageIndex, 1);
 
                 // Remove data from chartMonth
-                const datasetIndex = chartMonth.data.datasets.findIndex(ds => ds.label === row.fullaudio_language);
+                const datasetIndex = chartMonth.data.datasets.findIndex(ds => ds.label === row.supported_language);
                 if (datasetIndex !== -1) {
                     chartMonth.data.datasets.splice(datasetIndex, 1);
                 }
@@ -378,7 +379,7 @@ export function getAudioSupportGenre(genre) {
 
         $.rows.forEach(row => {
             if (row.release_year === null) {
-                if (row.fullaudio_language === null)
+                if (row.supported_language === null)
                     $("#value1").text(row.game_count);
                 else {
                     let { release_year, ...newRow } = row;
@@ -395,8 +396,8 @@ export function getAudioSupportGenre(genre) {
             else yearArray.push(row);
         });
 
-        $("#value2").text(mostSupportedLanguage.fullaudio_language + " - " + mostSupportedLanguage.game_count);
-        $("#value3").text(secondSupportedLanguage.fullaudio_language + " - " + secondSupportedLanguage.game_count);
+        $("#value2").text(mostSupportedLanguage.supported_language + " - " + mostSupportedLanguage.game_count);
+        $("#value3").text(secondSupportedLanguage.supported_language + " - " + secondSupportedLanguage.game_count);
     
 
         // generate charts
@@ -463,16 +464,16 @@ export function getAudioSupportGenre(genre) {
                 const labels = chartAll.data.labels;
                 const dataset = chartAll.data.datasets[0].data;
 
-                const languageIndex = labels.indexOf(row.fullaudio_language);
+                const languageIndex = labels.indexOf(row.supported_language);
                 
                 if (languageIndex == -1) {
-                    labels.push(row.fullaudio_language);
+                    labels.push(row.supported_language);
                     dataset.push(row.game_count);
 
                     // Create a new data array initialized to 0 for each year in chartYear's labels
                     const yearData = chartYear.data.labels.map(yearLabel => {
                         const match = yearArray.find(item => 
-                            item.fullaudio_language === row.fullaudio_language &&
+                            item.supported_language === row.supported_language &&
                             parseInt(item.release_year) === parseInt(yearLabel)
                         );
                         return match ? match.game_count : 0;
@@ -480,7 +481,7 @@ export function getAudioSupportGenre(genre) {
 
                     // Push a new dataset for this language in chartYear
                     chartYear.data.datasets.push({
-                        label: row.fullaudio_language,
+                        label: row.supported_language,
                         backgroundColor: colorArray[colorIndex],
                         data: yearData
                     });
@@ -492,11 +493,10 @@ export function getAudioSupportGenre(genre) {
                     dataset.splice(languageIndex, 1);
 
                     // Remove data from chartYear
-                    const datasetIndex = chartYear.data.datasets.findIndex(ds => ds.label === row.fullaudio_language);
+                    const datasetIndex = chartYear.data.datasets.findIndex(ds => ds.label === row.supported_language);
                     if (datasetIndex !== -1) {
                         chartYear.data.datasets.splice(datasetIndex, 1);
                     }
-
                 }
 
                 chartAll.update();
@@ -548,7 +548,7 @@ export function getAudioSupportGenreOnYear(genre, year) {
 
         $.rows.forEach(row => {
             if (row.release_month === null) {
-                if (row.fullaudio_language === null)
+                if (row.supported_language === null)
                     $("#value1").text(row.game_count);
                 else {
                     let { release_month, ...newRow } = row;
@@ -564,8 +564,8 @@ export function getAudioSupportGenreOnYear(genre, year) {
             else monthArray.push(row);
         });
 
-        $("#value2").text(mostSupportedLanguage.fullaudio_language + " - " + mostSupportedLanguage.game_count);
-        $("#value3").text(secondSupportedLanguage.fullaudio_language + " - " + secondSupportedLanguage.game_count);
+        $("#value2").text(mostSupportedLanguage.supported_language + " - " + mostSupportedLanguage.game_count);
+        $("#value3").text(secondSupportedLanguage.supported_language + " - " + secondSupportedLanguage.game_count);
     
 
         // generate charts
@@ -631,16 +631,16 @@ export function getAudioSupportGenreOnYear(genre, year) {
             const labels = chartAll.data.labels;
             const dataset = chartAll.data.datasets[0].data;
 
-            const languageIndex = labels.indexOf(row.fullaudio_language);
+            const languageIndex = labels.indexOf(row.supported_language);
             
             if (languageIndex == -1) {
-                labels.push(row.fullaudio_language);
+                labels.push(row.supported_language);
                 dataset.push(row.game_count);
 
                 // Create a new data array initialized to 0 for each month
                 const monthData = chartMonth.data.labels.map(monthLabel => {
                     const match = monthArray.find(item => 
-                        item.fullaudio_language === row.fullaudio_language &&
+                        item.supported_language === row.supported_language &&
                         parseInt(item.release_month) === months.indexOf(monthLabel)
                     );
                     return match ? match.game_count : 0;
@@ -648,7 +648,7 @@ export function getAudioSupportGenreOnYear(genre, year) {
 
                 // Push a new dataset for this language in chartMonth
                 chartMonth.data.datasets.push({
-                    label: row.fullaudio_language,
+                    label: row.supported_language,
                     backgroundColor: colorArray[colorIndex],
                     data: monthData
                 });
@@ -660,11 +660,11 @@ export function getAudioSupportGenreOnYear(genre, year) {
                 dataset.splice(languageIndex, 1);
 
                 // Remove data from chartMonth
-                const datasetIndex = chartMonth.data.datasets.findIndex(ds => ds.label === row.fullaudio_language);
+                const datasetIndex = chartMonth.data.datasets.findIndex(ds => ds.label === row.supported_language);
                 if (datasetIndex !== -1) {
                     chartMonth.data.datasets.splice(datasetIndex, 1);
                 }
-
+                
             }
 
             chartAll.update();
@@ -688,7 +688,7 @@ function createLanguageButtons(languageArray, onClickFunction) {
 
     languageArray.forEach((row, index) => {
         const button = document.createElement('button');
-        button.innerText = row.fullaudio_language;
+        button.innerText = row.supported_language;
         button.classList.add('language-button');
         button.onclick = () => {  onClickFunction(row); }
         buttonDiv.appendChild(button);

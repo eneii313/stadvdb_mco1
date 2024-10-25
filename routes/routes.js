@@ -263,4 +263,29 @@ router.get('/get-audio-support-dice', (req, res) => {
 });
 
 
+
+// ------------------------------------------------ QUERY THREE ------------------------------------------------
+router.get('/get-text-support-rollup', (req, res) => {
+  const query = 
+     `SELECT 	 gsl.supported_language AS supported_language,   
+          Year(g.release_date)   AS release_year,
+              count(g.appid)         AS game_count
+      FROM     games g
+      JOIN     game_supportedlanguages gsl
+      ON       g.appid = gsl.appid
+      GROUP BY gsl.supported_language,
+          release_year WITH ROLLUP
+      ORDER BY supported_language, release_year DESC;`
+
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database query failed' });
+    }
+
+      res.json({ columns: ['supported_language', 'release_year', 'game_count'] , rows: results});
+
+  });
+});
+
+
 module.exports = router;

@@ -1,6 +1,7 @@
 
-import {getAveragePriceAll, getAveragePriceGenre, getAveragePriceYear, getAveragePriceGenreOnYear} from './queryOne.js';
+import { getAveragePriceAll, getAveragePriceGenre, getAveragePriceYear, getAveragePriceGenreOnYear } from './queryOne.js';
 import { getAudioSupportAll, getAudioSupportYear, getAudioSupportGenre, getAudioSupportGenreOnYear } from './queryTwo.js';
+import { getTextSupportAll } from './queryThree.js';
 
 $(document).ready(function() {
 
@@ -62,6 +63,9 @@ $(document).ready(function() {
                 $("#genreSelectDiv").show();
                 $("#yearSelectDiv").show();
                 getAudioSupportAll();
+                break;
+            case "3":
+                getTextSupportAll();
                 break;
             default:
                 console.log("Invalid Query Number")
