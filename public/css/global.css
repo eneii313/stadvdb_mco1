@@ -24,9 +24,7 @@ h1 {
 }
 
 #queryProgress {
-    font-weight: normal
-    
-    ;
+    font-weight: normal;
     font-style: italic;
 }
 
@@ -36,7 +34,7 @@ label {
     margin: 0 10px;
 }
 
-#q1Options label {
+#options label {
     font-size: 1em;
 }
 
@@ -44,8 +42,21 @@ select {
     width: min-content;
 }
 
-label, select {
+#options div, label, select {
     display: inline-block;
+}
+
+#buttonDiv {
+    width: auto;
+    margin: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.language-button {
+    margin: 4px 2px;
 }
 
 #queryTable {
@@ -114,12 +125,15 @@ label, select {
     background-color: #f0f0f0;
     flex: 1 1 45%;
     box-sizing: border-box;
-    display: flex;
     align-items: center;
     justify-content: center;
-    max-height: 500px;
+    
     padding: 2px;
     margin: 6px;
+}
+
+.chart canvas {
+    max-height: 500px;
 }
 
 .rowSummary {

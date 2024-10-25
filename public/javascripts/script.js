@@ -1,5 +1,6 @@
 
 import {getAveragePriceAll, getAveragePriceGenre, getAveragePriceYear, getAveragePriceGenreOnYear} from './queryOne.js';
+import { getAudioSupportAll } from './queryTwo.js';
 
 $(document).ready(function() {
 
@@ -8,6 +9,18 @@ $(document).ready(function() {
         // create <option> elements and append them to <select>
         $.each(data, function(index, item) {
             $('#genreSelect').append(`<option value="${item.genre}">${item.genre}</option>`);
+            $.genres.push(item.genre);
+        });
+    })
+    .fail(function(xhr, status, error) {
+        console.error('Error:', error);
+    });
+
+    $.get('/get-languages', function(data) {
+
+        // create <option> elements and append them to <select>
+        $.each(data, function(index, item) {
+            $('#languageSelect').append(`<option value="${item.language}">${item.language}</option>`);
         });
     })
     .fail(function(xhr, status, error) {
@@ -19,6 +32,7 @@ $(document).ready(function() {
         // create <option> elements and append them to <select>
         $.each(data, function(index, item) {
             $('#yearSelect').append(`<option value="${item.release_year}">${item.release_year}</option>`);
+            $.years.push(item.release_year);
         });
     })
     .fail(function(xhr, status, error) {
@@ -33,17 +47,21 @@ $(document).ready(function() {
     $('#querySelect').on('change', function() {
         currentPage = 1;
         $("#currentPage").text(currentPage);
-        $('#options').hide();
-        $("#option").val("all");
+        $(".optionDiv").hide();
+        $(".option").val("all");
         $("#prevBtn").prop("disabled", true );
 
         // generate report base on selected query
         switch ($('#querySelect').val()) { 
             case "1":
+                $("#genreSelectDiv").show();
+                $("#yearSelectDiv").show();
                 getAveragePriceAll();
                 break;
             default: 
-                console.log("Invalid query number.");
+                $("#languageSelectDiv").show();
+                $("#yearSelectDiv").show();
+                getAudioSupportAll();
                 return;
 
         }
@@ -101,6 +119,9 @@ $(document).ready(function() {
 
 $.columns = []
 $.rows = []
+
+$.years = []
+$.genres = []
 
 var currentPage = 1;
 const row_limit = 15;
@@ -167,10 +188,12 @@ export function createChart (chartType, chartName, data, options) {
 
     let ctx = canvas.getContext('2d');
 
-    new Chart(ctx, {
+    const chart = new Chart(ctx, {
         type: chartType,
         data: data,
         options: options,
     });
+
+    return chart;
 
 }

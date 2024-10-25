@@ -34,23 +34,35 @@
                         <option value="-1" selected disabled>Select a query to generate a report.</option>
                         <!-- Query options will be added here -->
                          <option value="1">Average Video Game Prices Over Time Per Genre</option>
-                         <option value="2">Sample QUERY 2</option>
+                         <option value="2">Number of Games with Full Audio Support Per Language</option>
                     </select>
                 </form>
 
                 <form id="options" method="GET">
                   <br />
-                  <label for="genreSelect">Select Genre: </label>
-                    <select name="genreSelect" id="genreSelect" class="option">
-                         <option value="all">All Genres</option>
-                         <!-- all genres will show here -->
+                  <div id="genreSelectDiv" class="optionDiv">
+                    <label for="genreSelect">Select Genre: </label>
+                      <select name="genreSelect" id="genreSelect" class="option">
+                          <option value="all">All Genres</option>
+                          <!-- all genres will show here -->
+                      </select>
+                  </div>
+                  
+                  <div id="languageSelectDiv" class="optionDiv">
+                    <label for="languageSelect">Select Language: </label>
+                    <select name="languageSelect" id="languageSelect" class="option">
+                         <option value="all">All Languages</option>
+                         <!-- all language will show here -->
                     </select>
+                  </div>
 
+                  <div id="yearSelectDiv" class="optionDiv">
                     <label for="yearSelect">Select Year: </label>
                     <select name="yearSelect" id="yearSelect" class="option">
                          <option value="all">All Time</option>
                          <!-- all genres will show here -->
                     </select>
+                  </div>
                   <!-- <label for="genre1">Compare Two Genres: </label>
                     <select name="genre1" id="genre1">
                       <option value="year">Year</option>
@@ -96,7 +108,7 @@
 
               <br />
 
-
+            
               <div id="charts" class="hideOnStart">
                 <!-- Charts will be added here -->
               </div>

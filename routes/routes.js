@@ -51,7 +51,24 @@ router.get('/get-years', (req, res) => {
   });
 });
 
+router.get('/get-languages', (req, res) => {
 
+  const query = `SELECT DISTINCT fullaudio_language AS language FROM game_fullaudiolanguages
+                  ORDER BY language ASC;`;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database query failed' });
+    }
+
+    res.json(results);
+
+  });
+});
+
+
+
+// ------------------------------------------------ QUERY ONE ------------------------------------------------
 router.get('/get-avg-price-rollup', (req, res) => {
   const query = 
      `SELECT 	YEAR(release_date) AS release_year, 
@@ -141,6 +158,29 @@ router.get('/get-avg-price-dice', (req, res) => {
     }
 
       res.json({ columns: ['release_year', 'average_price', 'game_count'] , rows: results});
+
+  });
+});
+
+
+// ------------------------------------------------ QUERY TWO ------------------------------------------------
+router.get('/get-audio-support-rollup', (req, res) => {
+  const query = 
+     `SELECT      IFNULL(gfl.fullaudio_language, 'GRAND TOTAL') AS fullaudio_language,
+                  IFNULL(YEAR(g.release_date), 'Language Total') AS release_year,
+                  COUNT(g.appid) AS game_count
+      FROM        games g
+      JOIN        game_fullaudiolanguages gfl ON g.appid = gfl.appid
+      WHERE       g.release_date IS NOT NULL
+      GROUP BY    fullaudio_language, release_year WITH ROLLUP
+      ORDER BY    gfl.fullaudio_language, release_year;`
+
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database query failed' });
+    }
+
+      res.json({ columns: ['fullaudio_language', 'release_year', 'game_count'] , rows: results});
 
   });
 });
