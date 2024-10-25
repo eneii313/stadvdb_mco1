@@ -43,7 +43,6 @@ export function getTextSupportAll() {
                 if (row.supported_language === null)
                     $("#value1").text(row.game_count);
                 else {
-                    console.log("Pushing " + row.supported_language);
                     let { release_year, ...newRow } = row;
                     languageArray.push(newRow);
 
@@ -117,8 +116,8 @@ export function getTextSupportAll() {
 
         }
 
-        const chartAll = createChart("bar", "audioSupportAllTime", data1, options1);
-        const chartYear = createChart("bar", "audioSupportByYear", data2, options2);
+        const chartAll = createChart("bar", "textSupportAllTime", data1, options1);
+        const chartYear = createChart("bar", "textSupportByYear", data2, options2);
 
 
         // create Toggle language buttons
@@ -177,12 +176,12 @@ export function getTextSupportAll() {
     });
 }
 
-export function getAudioSupportYear(year) {
+export function getTextSupportYear(year) {
     startTimer(); 
     var languageArray = [];
     var monthArray = [];
     
-    $.get('/get-audio-support-drilldown', {year: year}, function(data) {
+    $.get('/get-text-support-drilldown', {year: year}, function(data) {
         $.columns = data.columns
         $.rows = data.rows
         
@@ -205,7 +204,7 @@ export function getAudioSupportYear(year) {
         var mostSupportedLanguage = {game_count: -1};
         var secondSupportedLanguage = {game_count: -1};
 
-        $("#title1").text("Total Audio Support Across All Languages in " + year);
+        $("#title1").text("Total Text Support Across All Languages in " + year);
         $("#title2").text("Most Supported Language in " + year);
         $("#title3").text("Second Most Supported Language in " + year);
 
@@ -254,7 +253,7 @@ export function getAudioSupportYear(year) {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Total Game Count with Audio Support by Language in ' + year
+                    text: 'Total Game Count with Text Support by Language in ' + year
                 }
              },
 
@@ -280,14 +279,14 @@ export function getAudioSupportYear(year) {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Total Game Count with Audio Support by Language by Month'
+                    text: 'Total Game Count with Text Support by Language by Month'
                 }
              },
 
         }
 
-        const chartAll = createChart("bar", "audioSupportInYear", data1, options1);
-        const chartMonth = createChart("bar", "audioSupportByMonth", data2, options2);
+        const chartAll = createChart("bar", "textSupportInYear", data1, options1);
+        const chartMonth = createChart("bar", "textSupportByMonth", data2, options2);
 
 
         createLanguageButtons(languageArray, function toggleLanguage(row) {
@@ -343,13 +342,13 @@ export function getAudioSupportYear(year) {
     });
 }
 
-export function getAudioSupportGenre(genre) {
+export function getTextSupportGenre(genre) {
     startTimer(); 
     colorIndex = 0;
     var yearArray = []; // language, year, count
     var languageArray = []; // language, total count
     
-    $.get('/get-audio-support-slice', {genre: genre}, function(data) {
+    $.get('/get-text-support-slice', {genre: genre}, function(data) {
         $.columns = data.columns
         $.rows = data.rows
         
@@ -373,7 +372,7 @@ export function getAudioSupportGenre(genre) {
         var mostSupportedLanguage = {game_count: -1};
         var secondSupportedLanguage = {game_count: -1};
 
-        $("#title1").text("Total Audio Support Across All Languages in " + genre);
+        $("#title1").text("Total Text Support Across All Languages in " + genre);
         $("#title2").text("Most Supported Language in " + genre);
         $("#title3").text("Second Most Supported Language in " + genre);
 
@@ -423,7 +422,7 @@ export function getAudioSupportGenre(genre) {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Total Game Count with Audio Support by Language in ' + genre
+                    text: 'Total Game Count with Text Support by Language in ' + genre
                 }
              },
 
@@ -449,14 +448,14 @@ export function getAudioSupportGenre(genre) {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Total Game Count with Audio Support by Language by Year in ' + genre
+                    text: 'Total Game Count with Text Support by Language by Year in ' + genre
                 }
              },
 
         }
 
-        const chartAll = createChart("bar", "audioSupportInGenre", data1, options1);
-        const chartYear = createChart("bar", "audioSupportInGenreByYear", data2, options2);
+        const chartAll = createChart("bar", "textSupportInGenre", data1, options1);
+        const chartYear = createChart("bar", "textSupportInGenreByYear", data2, options2);
 
 
         // // create Toggle language buttons
@@ -514,12 +513,12 @@ export function getAudioSupportGenre(genre) {
     });
 }
 
-export function getAudioSupportGenreOnYear(genre, year) {
+export function getTextSupportGenreOnYear(genre, year) {
     startTimer(); 
     var languageArray = [];
     var monthArray = [];
     
-    $.get('/get-audio-support-dice', {genre: genre, year: year}, function(data) {
+    $.get('/get-text-support-dice', {genre: genre, year: year}, function(data) {
         $.columns = data.columns
         $.rows = data.rows
         
@@ -542,7 +541,7 @@ export function getAudioSupportGenreOnYear(genre, year) {
         var mostSupportedLanguage = {game_count: -1};
         var secondSupportedLanguage = {game_count: -1};
 
-        $("#title1").text("Total Audio Support Across All Languages in " + genre + " - " + year);
+        $("#title1").text("Total Text Support Across All Languages in " + genre + " - " + year);
         $("#title2").text("Most Supported Language in " + genre + " - " + year);
         $("#title3").text("Second Most Supported Language in " + genre + " - " + year);
 
@@ -591,7 +590,7 @@ export function getAudioSupportGenreOnYear(genre, year) {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Total Game Count with Audio Support by Language in ' + year
+                    text: 'Total Game Count with Text Support by Language in ' + year
                 }
              },
 
@@ -617,14 +616,14 @@ export function getAudioSupportGenreOnYear(genre, year) {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Total Game Count with Audio Support by Language by Month'
+                    text: 'Total Game Count with Text Support by Language by Month'
                 }
              },
 
         }
 
-        const chartAll = createChart("bar", "audioSupportInYear", data1, options1);
-        const chartMonth = createChart("bar", "audioSupportByMonth", data2, options2);
+        const chartAll = createChart("bar", "textSupportInYear", data1, options1);
+        const chartMonth = createChart("bar", "textSupportByMonth", data2, options2);
 
 
         createLanguageButtons(languageArray, function toggleLanguage(row) {
@@ -664,7 +663,7 @@ export function getAudioSupportGenreOnYear(genre, year) {
                 if (datasetIndex !== -1) {
                     chartMonth.data.datasets.splice(datasetIndex, 1);
                 }
-                
+
             }
 
             chartAll.update();

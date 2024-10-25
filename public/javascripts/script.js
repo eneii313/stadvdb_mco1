@@ -1,7 +1,7 @@
 
 import { getAveragePriceAll, getAveragePriceGenre, getAveragePriceYear, getAveragePriceGenreOnYear } from './queryOne.js';
 import { getAudioSupportAll, getAudioSupportYear, getAudioSupportGenre, getAudioSupportGenreOnYear } from './queryTwo.js';
-import { getTextSupportAll } from './queryThree.js';
+import { getTextSupportAll, getTextSupportYear, getTextSupportGenre, getTextSupportGenreOnYear } from './queryThree.js';
 
 $(document).ready(function() {
 
@@ -65,6 +65,8 @@ $(document).ready(function() {
                 getAudioSupportAll();
                 break;
             case "3":
+                $("#genreSelectDiv").show();
+                $("#yearSelectDiv").show();
                 getTextSupportAll();
                 break;
             default:
@@ -101,6 +103,16 @@ $(document).ready(function() {
                     getAudioSupportYear(year); //drilldown
                 else if (genre != "all" && year == "all")
                     getAudioSupportGenre(genre); //slice
+                else if (genre != "all" && year != "all")
+                    getAudioSupportGenreOnYear(genre, year); // dice
+                break;
+            case "3":
+                if (genre == "all" && year == "all")
+                    getTextSupportAll(); // rollup
+                else if (genre == "all" && year != "all")
+                    getTextSupportYear(year); //drilldown
+                else if (genre != "all" && year == "all")
+                    getTextSupportGenre(genre); //slice
                 else if (genre != "all" && year != "all")
                     getAudioSupportGenreOnYear(genre, year); // dice
                 break;

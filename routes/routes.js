@@ -229,7 +229,7 @@ router.get('/get-audio-support-slice', (req, res) => {
       return res.status(500).json({ error: 'Database query failed' });
     }
 
-      res.json({ columns: ['release_year', 'fullaudio_language', 'game_count'] , rows: results});
+      res.json({ columns: ['fullaudio_language', 'release_year', 'game_count'] , rows: results});
 
   });
 });
@@ -286,6 +286,85 @@ router.get('/get-text-support-rollup', (req, res) => {
 
   });
 });
+
+router.get('/get-text-support-drilldown', (req, res) => {
+  var year = req.query.year;
+  const query = 
+     `SELECT   gsl.supported_language AS supported_language,   
+               month(g.release_date) AS release_month,
+               count(g.appid) AS game_count
+      FROM     games g
+      JOIN     game_supportedlanguages gsl
+      ON       g.appid=gsl.appid
+      WHERE 	 year(release_date) = ?
+      AND      g.release_date IS NOT NULL
+      GROUP BY gsl.supported_language, release_month WITH ROLLUP
+      ORDER BY gsl.supported_language, release_month ASC;`
+
+  db.query(query, [year], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database query failed' });
+    }
+
+      res.json({ columns: ['supported_language', 'release_month', 'game_count'] , rows: results});
+
+  });
+});
+
+router.get('/get-text-support-slice', (req, res) => {
+  var genre = req.query.genre;
+
+  const query = 
+     `SELECT  gsl.supported_language AS supported_language,
+          Year(g.release_date)  AS release_year,
+          Count(g.appid) AS game_count
+      FROM     games g
+      JOIN     game_supportedlanguages gsl ON g.appid=gsl.appid
+      JOIN	   game_genres gg ON g.appid=gg.appid
+      WHERE    gg.genre = ?
+      AND		   g.release_date IS NOT NULL
+      GROUP BY  supported_language, release_year WITH ROLLUP
+      ORDER BY  supported_language, release_year ASC;`
+
+  db.query(query, [genre], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database query failed' });
+    }
+
+      res.json({ columns: ['release_year', 'supported_language', 'game_count'] , rows: results});
+
+  });
+});
+
+router.get('/get-text-support-dice', (req, res) => {
+  var year = req.query.year;
+  var start = year + '-01-01';
+  var end = year + '-12-31';
+  var genre = req.query.genre;
+
+  const query = 
+     `SELECT  gsl.supported_language AS supported_language,
+              Year(g.release_date)  AS release_year,
+              Count(g.appid) AS game_count
+      FROM     games g
+      JOIN     game_supportedlanguages gsl ON g.appid=gsl.appid
+      JOIN	 game_genres gg ON g.appid=gg.appid
+      WHERE    gg.genre = 'RPG'
+      AND		 g.release_date IS NOT NULL
+      AND		 g.release_date BETWEEN '2009-01-01' AND '2009-12-31'
+      GROUP BY  supported_language, release_year WITH ROLLUP
+      ORDER BY  supported_language, release_year ASC;`
+
+  db.query(query, [start, end, genre], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database query failed' });
+    }
+
+      res.json({ columns: ['supported_language', 'release_month', 'game_count'] , rows: results});
+
+  });
+});
+
 
 
 module.exports = router;
