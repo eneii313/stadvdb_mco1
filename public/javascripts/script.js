@@ -1,6 +1,6 @@
 
 import {getAveragePriceAll, getAveragePriceGenre, getAveragePriceYear, getAveragePriceGenreOnYear} from './queryOne.js';
-import { getAudioSupportAll, getAudioSupportYear } from './queryTwo.js';
+import { getAudioSupportAll, getAudioSupportYear, getAudioSupportGenre } from './queryTwo.js';
 
 $(document).ready(function() {
 
@@ -58,10 +58,13 @@ $(document).ready(function() {
                 $("#yearSelectDiv").show();
                 getAveragePriceAll();
                 break;
-            default: 
-                $("#languageSelectDiv").show();
+            case "2": 
+                $("#genreSelectDiv").show();
                 $("#yearSelectDiv").show();
                 getAudioSupportAll();
+                break;
+            default:
+                console.log("Invalid Query Number")
                 return;
 
         }
@@ -79,18 +82,25 @@ $(document).ready(function() {
         switch (query) {
             case "1":
                 if (genre == "all" && year == "all")
-                    getAveragePriceAll();
-                else if (genre != "all" && year == "all")
-                    getAveragePriceGenre(genre);
+                    getAveragePriceAll(); //rollup
                 else if (genre == "all" && year != "all")
-                    getAveragePriceYear(year);
+                    getAveragePriceYear(year); // drilldown
+                else if (genre != "all" && year == "all")
+                    getAveragePriceGenre(genre); // slice
                 else if (genre != "all" && year != "all")
-                    getAveragePriceGenreOnYear(genre, year);
+                    getAveragePriceGenreOnYear(genre, year); // dice
+                break;
             case "2":
-                if (year == "all")
-                    getAudioSupportAll();
-                else if (year != "all")
-                    getAudioSupportYear(year);
+                if (genre == "all" && year == "all")
+                    getAudioSupportAll(); // rollup
+                else if (genre == "all" && year != "all")
+                    getAudioSupportYear(year); //drilldown
+                else if (genre != "all" && year == "all")
+                    getAudioSupportGenre(genre); //slice
+                break;
+            default:
+                console.log("Invalid Query Configuration")
+                return;
         }
 
     });

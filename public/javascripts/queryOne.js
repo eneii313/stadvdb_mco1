@@ -10,6 +10,11 @@ export function getAveragePriceAll() {
         
         $('#tableHeaders').empty();
 
+        if (data.rows.length == 0) {
+            $("#queryProgress").text("The query returned no results.");
+            return;
+        }
+
         // Generate table headers
         $.each($.columns, function(index, col) {
             $('#tableHeaders').append(`<th>`+col+`</th>`);
@@ -120,13 +125,18 @@ export function getAveragePriceAll() {
 
 
 export function getAveragePriceGenre(genre) {
-    startTimer(); 
+    startTimer();
     
     $.get('/get-avg-price-slice', {genre: genre}, function(data) {
         $.columns = data.columns
         $.rows = data.rows
         
         $('#tableHeaders').empty();
+
+        if (data.rows.length == 0) {
+            $("#queryProgress").text("The query returned no results.");
+            return;
+        }
 
         // Generate table headers
         $.each($.columns, function(index, col) {
@@ -234,6 +244,11 @@ export function getAveragePriceYear(year) {
         $.rows = data.rows
         
         $('#tableHeaders').empty();
+
+        if (data.rows.length == 0) {
+            $("#queryProgress").text("The query returned no results.");
+            return;
+        }
 
         // Generate table headers
         $.each($.columns, function(index, col) {
@@ -355,6 +370,11 @@ export function getAveragePriceGenreOnYear(genre, year) {
         $.rows = data.rows
         
         $('#tableHeaders').empty();
+
+        if (data.rows.length == 0) {
+            $("#queryProgress").text("The query returned no results.");
+            return;
+        }
 
         // Generate table headers
         $.each($.columns, function(index, col) {

@@ -210,5 +210,58 @@ router.get('/get-audio-support-drilldown', (req, res) => {
   });
 });
 
+router.get('/get-audio-support-slice', (req, res) => {
+  var genre = req.query.genre;
+
+  const query = 
+     `SELECT  gfl.fullaudio_language AS fullaudio_language,
+          Year(g.release_date)  AS release_year,
+          Count(g.appid) AS game_count
+      FROM     games g
+      JOIN     game_fullaudiolanguages gfl ON g.appid=gfl.appid
+      JOIN	 game_genres gg ON g.appid=gg.appid
+      WHERE      gg.genre = ?
+      GROUP BY  fullaudio_language, release_year WITH ROLLUP
+      ORDER BY  fullaudio_language, release_year ASC;`
+
+  db.query(query, [genre], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database query failed' });
+    }
+
+      res.json({ columns: ['release_year', 'fullaudio_language', 'game_count'] , rows: results});
+
+  });
+});
+
+router.get('/get-audio-support-dice', (req, res) => {
+  var year = req.query.year;
+  var start = year + '-01-01';
+  var end = year + '-12-31';
+  var genre = req.query.genre;
+
+  const query = 
+     `SELECT   Year(g.release_date)  AS release_year,
+      Month(g.release_date) AS release_month,
+      gfl.fullaudio_language AS fullaudio_language,
+      Count(g.appid) AS game_count
+      FROM     games g
+      JOIN     game_fullaudiolanguages gfl ON g.appid=gfl.appid
+      JOIN	 game_genres gg ON g.appid=gg.appid
+      WHERE    g.release_date BETWEEN ? AND ?
+      AND      gg.genre = ?
+      GROUP BY release_year, release_month, fullaudio_language
+      ORDER BY release_year, release_month ASC;`
+
+  db.query(query, [start, end, genre], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database query failed' });
+    }
+
+      res.json({ columns: ['release_year', 'release_month', 'fullaudio_language', 'game_count'] , rows: results});
+
+  });
+});
+
 
 module.exports = router;

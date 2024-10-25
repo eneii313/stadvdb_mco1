@@ -16,6 +16,11 @@ export function getAudioSupportAll() {
         
         $('#tableHeaders').empty();
 
+        if (data.rows.length == 0) {
+            $("#queryProgress").text("The query returned no results.");
+            return;
+        }
+
         // Generate table headers
         $.each($.columns, function(index, col) {
             $('#tableHeaders').append(`<th>`+col+`</th>`);
@@ -183,6 +188,11 @@ export function getAudioSupportYear(year) {
         
         $('#tableHeaders').empty();
 
+        if (data.rows.length == 0) {
+            $("#queryProgress").text("The query returned no results.");
+            return;
+        }
+
         // Generate table headers
         $.each($.columns, function(index, col) {
             $('#tableHeaders').append(`<th>`+col+`</th>`);
@@ -334,6 +344,178 @@ export function getAudioSupportYear(year) {
     });
 }
 
+export function getAudioSupportGenre(genre) {
+    startTimer(); 
+    colorIndex = 0;
+    var yearArray = []; // language, year, count
+    var languageArray = []; // language, total count
+    
+    $.get('/get-audio-support-slice', {genre: genre}, function(data) {
+        $.columns = data.columns
+        $.rows = data.rows
+        
+        $('#tableHeaders').empty();
+
+        if (data.rows.length == 0) {
+            $("#queryProgress").text("The query returned no results.");
+            return;
+        }
+
+        // Generate table headers
+        $.each($.columns, function(index, col) {
+            $('#tableHeaders').append(`<th>`+col+`</th>`);
+        });
+
+        // Generate first table rows
+        getRows(1);
+
+        
+        //  GENERATE SUMMARY
+        var mostSupportedLanguage = $.rows[1];
+        var secondSupportedLanguage = $.rows[1];
+
+        $("#title1").text("Total Audio Support Across All Languages in " + genre);
+        $("#title2").text("Most Supported Language in " + genre);
+        $("#title3").text("Second Most Supported Language in " + genre);
+
+        $.rows.forEach(row => {
+            if (row.release_year === null) {
+                if (row.fullaudio_language === null)
+                    $("#value1").text(row.game_count);
+                else {
+                    let { release_year, ...newRow } = row;
+                    languageArray.push(newRow);
+
+                    if (row.game_count > mostSupportedLanguage.game_count){
+                        secondSupportedLanguage = mostSupportedLanguage;
+                        mostSupportedLanguage = row;
+                    } else if (row.game_count > secondSupportedLanguage.game_count) {
+                        secondSupportedLanguage = row;
+                    }
+                }
+            }
+            else yearArray.push(row);
+        });
+
+        $("#value2").text(mostSupportedLanguage.fullaudio_language + " - " + mostSupportedLanguage.game_count);
+        $("#value3").text(secondSupportedLanguage.fullaudio_language + " - " + secondSupportedLanguage.game_count);
+    
+
+        // generate charts
+        var data1 = {
+            labels: [],
+            datasets : [
+                {
+                    label: 'Language',
+                    backgroundColor: colorArray,
+                    data: [],
+                }
+            ]
+        };
+
+        var options1 = {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Total Game Count with Audio Support by Language in ' + genre
+                }
+             },
+
+        }
+
+        var data2 = {
+            labels: $.years,
+            datasets : []
+        };
+
+        var options2 = {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    stacked: true
+                },
+                y: {
+                    beginAtZero: true,
+                    stacked: true
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Total Game Count with Audio Support by Language by Year in ' + genre
+                }
+             },
+
+        }
+
+        const chartAll = createChart("bar", "audioSupportInGenre", data1, options1);
+        const chartYear = createChart("bar", "audioSupportInGenreByYear", data2, options2);
+
+
+        // // create Toggle language buttons
+        createLanguageButtons(languageArray, function toggleLanguage(row) {
+                const labels = chartAll.data.labels;
+                const dataset = chartAll.data.datasets[0].data;
+
+                const languageIndex = labels.indexOf(row.fullaudio_language);
+                
+                if (languageIndex == -1) {
+                    labels.push(row.fullaudio_language);
+                    dataset.push(row.game_count);
+
+                    // Create a new data array initialized to 0 for each year in chartYear's labels
+                    const yearData = chartYear.data.labels.map(yearLabel => {
+                        const match = yearArray.find(item => 
+                            item.fullaudio_language === row.fullaudio_language &&
+                            parseInt(item.release_year) === parseInt(yearLabel)
+                        );
+                        return match ? match.game_count : 0;
+                    });
+
+                    // Push a new dataset for this language in chartYear
+                    chartYear.data.datasets.push({
+                        label: row.fullaudio_language,
+                        backgroundColor: colorArray[colorIndex],
+                        data: yearData
+                    });
+
+                    colorIndex = (colorIndex + 1) % colorArray.length;
+
+                } else {
+                    labels.splice(languageIndex, 1);
+                    dataset.splice(languageIndex, 1);
+
+                    // Remove data from chartYear
+                    const datasetIndex = chartYear.data.datasets.findIndex(ds => ds.label === row.fullaudio_language);
+                    if (datasetIndex !== -1) {
+                        chartYear.data.datasets.splice(datasetIndex, 1);
+                    }
+
+                    colorIndex = Math.max(colorIndex - 1, 0);
+                }
+
+                chartAll.update();
+                chartYear.update();
+        });
+        
+        $("#charts").append(buttonDiv);
+
+        endTimer();
+        $('#options').show();
+
+    })
+    .fail(function(xhr, status, error) {
+        console.error('Error:', error);
+    });
+}
 
 
 // create Toggle language buttons
