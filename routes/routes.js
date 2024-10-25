@@ -241,24 +241,23 @@ router.get('/get-audio-support-dice', (req, res) => {
   var genre = req.query.genre;
 
   const query = 
-     `SELECT   Year(g.release_date)  AS release_year,
-      Month(g.release_date) AS release_month,
-      gfl.fullaudio_language AS fullaudio_language,
-      Count(g.appid) AS game_count
+     `SELECT  gfl.fullaudio_language AS fullaudio_language,
+              Month(g.release_date) AS release_month,
+              Count(g.appid) AS game_count
       FROM     games g
       JOIN     game_fullaudiolanguages gfl ON g.appid=gfl.appid
       JOIN	 game_genres gg ON g.appid=gg.appid
       WHERE    g.release_date BETWEEN ? AND ?
       AND      gg.genre = ?
-      GROUP BY release_year, release_month, fullaudio_language
-      ORDER BY release_year, release_month ASC;`
+      GROUP BY fullaudio_language, release_month WITH ROLLUP
+      ORDER BY fullaudio_language, release_month ASC;`
 
   db.query(query, [start, end, genre], (err, results) => {
     if (err) {
       return res.status(500).json({ error: 'Database query failed' });
     }
 
-      res.json({ columns: ['release_year', 'release_month', 'fullaudio_language', 'game_count'] , rows: results});
+      res.json({ columns: ['fullaudio_language', 'release_month', 'game_count'] , rows: results});
 
   });
 });

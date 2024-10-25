@@ -1,6 +1,6 @@
 
 import {getAveragePriceAll, getAveragePriceGenre, getAveragePriceYear, getAveragePriceGenreOnYear} from './queryOne.js';
-import { getAudioSupportAll, getAudioSupportYear, getAudioSupportGenre } from './queryTwo.js';
+import { getAudioSupportAll, getAudioSupportYear, getAudioSupportGenre, getAudioSupportGenreOnYear } from './queryTwo.js';
 
 $(document).ready(function() {
 
@@ -97,6 +97,8 @@ $(document).ready(function() {
                     getAudioSupportYear(year); //drilldown
                 else if (genre != "all" && year == "all")
                     getAudioSupportGenre(genre); //slice
+                else if (genre != "all" && year != "all")
+                    getAudioSupportGenreOnYear(genre, year); // dice
                 break;
             default:
                 console.log("Invalid Query Configuration")
