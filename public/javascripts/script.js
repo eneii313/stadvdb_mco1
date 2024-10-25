@@ -1,6 +1,6 @@
 
 import {getAveragePriceAll, getAveragePriceGenre, getAveragePriceYear, getAveragePriceGenreOnYear} from './queryOne.js';
-import { getAudioSupportAll } from './queryTwo.js';
+import { getAudioSupportAll, getAudioSupportYear } from './queryTwo.js';
 
 $(document).ready(function() {
 
@@ -86,6 +86,11 @@ $(document).ready(function() {
                     getAveragePriceYear(year);
                 else if (genre != "all" && year != "all")
                     getAveragePriceGenreOnYear(genre, year);
+            case "2":
+                if (year == "all")
+                    getAudioSupportAll();
+                else if (year != "all")
+                    getAudioSupportYear(year);
         }
 
     });

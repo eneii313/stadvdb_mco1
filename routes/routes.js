@@ -185,4 +185,30 @@ router.get('/get-audio-support-rollup', (req, res) => {
   });
 });
 
+
+router.get('/get-audio-support-drilldown', (req, res) => {
+  var year = req.query.year;
+  const query = 
+     `SELECT	gfl.fullaudio_language AS fullaudio_language,   
+              Month(g.release_date) AS release_month,
+              Count(g.appid) AS game_count
+      FROM     games g
+      JOIN     game_fullaudiolanguages gfl
+      ON       g.appid=gfl.appid
+      WHERE   g.release_date IS NOT NULL
+      AND		YEAR(g.release_date) = ?
+      GROUP BY fullaudio_language, release_month WITH ROLLUP
+      ORDER BY gfl.fullaudio_language, release_month ASC;`
+
+  db.query(query, [year], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database query failed' });
+    }
+
+      res.json({ columns: ['fullaudio_language', 'release_month', 'game_count'] , rows: results});
+
+  });
+});
+
+
 module.exports = router;
