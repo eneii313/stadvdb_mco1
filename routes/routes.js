@@ -39,6 +39,7 @@ router.get('/get-years', (req, res) => {
 
   const query = `SELECT DISTINCT YEAR(release_date) AS release_year FROM games
                   WHERE release_date IS NOT NULL
+                  AND   release_date < '2025-01-01'
                   ORDER BY release_year ASC;`;
 
   db.query(query, (err, results) => {
@@ -94,7 +95,7 @@ router.get('/get-avg-price-rollup', (req, res) => {
       JOIN 		game_genres gg
       ON			g.AppID = gg.AppID
       WHERE 	release_date IS NOT NULL
-      AND			NOT YEAR(release_date) = 2025
+      AND     g.release_date < '2025-01-01'
       GROUP BY 	release_year, genre WITH ROLLUP
       ORDER BY 	release_year, genre ASC;`
 
@@ -111,17 +112,20 @@ router.get('/get-avg-price-rollup', (req, res) => {
 
 router.get('/get-avg-price-drilldown', (req, res) => {
   var year = req.query.year;
+  var start = year + '-01-01';
+  var end = year + '-12-31';
   const query = 
   `SELECT  MONTH(release_date) AS release_month,
           ROUND(AVG(price), 2) AS average_price,
           COUNT(g.appid) AS game_count
     FROM games g
     JOIN game_genres gg on g.AppID = gg.AppID
-    WHERE YEAR(release_date) = ?
+    WHERE release_date IS NOT NULL
+    AND   release_date BETWEEN ? AND ?
     GROUP BY release_month
     ORDER BY release_month ASC;`
 
-  db.query(query, [year], (err, results) => {
+  db.query(query, [start, end], (err, results) => {
     if (err) {
       return res.status(500).json({ error: 'Database query failed' });
     }
@@ -137,10 +141,11 @@ router.get('/get-avg-price-slice', (req, res) => {
   `SELECT 	YEAR(release_date) AS release_year, 
             ROUND(AVG(price), 2) AS average_price,
             COUNT(g.appid) AS game_count
-    FROM 	games g
-    JOIN 	game_genres gg on g.AppID = gg.AppID
-    WHERE 	genre = ?
-    AND			NOT YEAR(release_date) = 2025
+    FROM 	   games g
+    JOIN 	   game_genres gg on g.AppID = gg.AppID
+    WHERE 	 genre = ?
+    AND      release_date IS NOT NULL
+    AND		   release_date < '2025-01-01'
     GROUP BY release_year
     ORDER BY release_year;`
 
@@ -156,18 +161,22 @@ router.get('/get-avg-price-slice', (req, res) => {
 
 router.get('/get-avg-price-dice', (req, res) => {
   var year = req.query.year;
+  var start = year + '-01-01';
+  var end = year + '-12-31';
   var genre = req.query.genre;
   const query = 
   `SELECT MONTH(release_date) AS release_month, 
            ROUND(AVG(price), 2) AS average_price,
            COUNT(g.appid) AS game_count
-    FROM games g
-    JOIN game_genres gg on g.AppID = gg.AppID
-    WHERE YEAR(release_date) = ? AND genre = ?
+    FROM    games g
+    JOIN     game_genres gg on g.AppID = gg.AppID
+    WHERE    release_date IS NOT NULL
+    AND      release_date BETWEEN ? AND ?
+    AND      genre = ?
     GROUP BY release_month
     ORDER BY release_month;`
 
-  db.query(query, [year, genre], (err, results) => {
+  db.query(query, [start, end, genre], (err, results) => {
     if (err) {
       return res.status(500).json({ error: 'Database query failed' });
     }
@@ -395,6 +404,7 @@ router.get('/get-score-rank-rollup', (req, res) => {
       WHERE    r.metacritic_score IS NOT NULL
               AND r.metacritic_score != 0
               AND g.release_date IS NOT NULL
+              AND g.release_date < '2025-01-01'
       GROUP BY gc.category, release_year WITH ROLLUP
       ORDER BY gc.category, (release_year IS NULL), rnk ASC;`
 
@@ -404,6 +414,36 @@ router.get('/get-score-rank-rollup', (req, res) => {
     }
 
       res.json({ columns: ['category', 'release_year', 'avg_metacritic_score', 'rnk'] , rows: results});
+
+  });
+});
+
+router.get('/get-score-rank-drilldown', (req, res) => {
+  var year = req.query.year;
+  var start = year + '-01-01';
+  var end = year + '-12-31';
+  const query = 
+     `SELECT 	 gc.category AS category,
+         Month(g.release_date) AS release_month,
+         ROUND(avg(r.metacritic_score), 2) AS avg_metacritic_score,
+         rank() OVER (partition BY category ORDER BY avg(r.metacritic_score) DESC) AS rnk
+      FROM     games g
+      JOIN     reviews r
+      ON       g.appid = r.appid
+      JOIN     game_categories gc
+      ON       g.appid = gc.appid
+      WHERE   r.metacritic_score IS NOT NULL AND r.metacritic_score != 0
+      AND 	g.release_date IS NOT NULL
+      AND		YEAR(g.release_date) BETWEEN ? AND ?
+      GROUP BY  gc.category, release_month WITH ROLLUP
+      ORDER BY gc.category, release_month ASC;`
+
+  db.query(query, [start, end], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database query failed' });
+    }
+
+      res.json({ columns: ['category', 'release_month', 'avg_metacritic_score'] , rows: results});
 
   });
 });

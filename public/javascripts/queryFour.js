@@ -1,6 +1,6 @@
 
 import { startTimer, endTimer, getRows, createChart } from './script.js';
-
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const colorArray = [ "#0f0529","#924d8f","#7338a0","#924dbf","#9e72c3"];
 var colorIndex = 0;
 
@@ -184,6 +184,199 @@ export function getScoreRankAll() {
 
             chartAll.update();
             chartYear.update();
+        });
+
+        endTimer();
+        $('#options').show();
+
+    })
+    .fail(function(xhr, status, error) {
+        console.error('Error:', error);
+    });
+}
+
+
+export function getScoreRankYear(year) {
+    startTimer(); 
+    var categoryArray = [];
+    var monthArray = [];
+    
+    $.get('/get-score-rank-drilldown', {year: year}, function(data) {
+        $.columns = data.columns
+        $.rows = data.rows
+        
+        $('#tableHeaders').empty();
+
+        if (data.rows.length == 0) {
+            $("#queryProgress").text("The query returned no results.");
+            return;
+        }
+
+        // Generate table headers
+        $.each($.columns, function(index, col) {
+            $('#tableHeaders').append(`<th>`+col+`</th>`);
+        });
+
+        // Generate first table rows
+        getRows(1);
+
+        //  GENERATE SUMMARY
+        var  highestCategory= {avg_metacritic_score: -1};
+        var highestMonth = {avg_metacritic_score: -1};
+
+        $("#title1").text("Average Metacritic Score in " + year);
+        $("#title2").text("Category with Highest Average Metacritic Score in " + year);
+        $("#title3").text("Month & Category with Highest Average Metacritic Score in " + year);
+
+        $.rows.forEach(row => {
+            if (row.release_month === null) {
+                if (row.category === null)
+                    $("#value1").text(row.avg_metacritic_score);
+                else {
+                    let { release_month, rnk, ...newRow } = row;
+                    categoryArray.push(newRow);
+                    if (parseFloat(row.avg_metacritic_score) > parseFloat(highestCategory.avg_metacritic_score)){
+                        highestCategory = row;
+                    }           
+                }
+            }
+            else  {
+                monthArray.push(row);
+                if (row.rnk == 1 && parseFloat(row.avg_metacritic_score) > parseFloat(highestMonth.avg_metacritic_score)){
+                    highestMonth = row;
+                }
+            }
+        });
+
+        $("#value2").text(highestCategory.category + " - " + highestCategory.avg_metacritic_score);
+        $("#value3").text(highestMonth.category + " (" + months[highestMonth.release_month] + ") - " + highestCategory.avg_metacritic_score);
+    
+
+        // generate charts
+        var data1 = {
+            labels: [],
+            datasets : [
+                {
+                    label: 'Category',
+                    backgroundColor: colorArray,
+                    data: [],
+                }
+            ]
+        };
+
+        var options1 = {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                min: 0,
+                max: 100,
+              }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Average Metacritic Score in ' + year
+                }
+             },
+
+        }
+
+        var data2 = {
+            labels: months,
+            datasets : []
+        };
+
+        var options2 = {
+            responsive: true,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            stacked: false,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Month'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    min: 0,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Average Metacritic Score by Month'
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Average Metacritic Score by Category by Month in' + year
+                },
+                legend: {
+                    display: true,
+                    position: 'top',
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                }
+            },
+
+        }
+
+        const chartAll = createChart("bar", "scoreInYear", data1, options1);
+        const chartMonth = createChart("line", "scoreInYearByMonth", data2, options2);
+
+
+        createCategoryButtons(categoryArray, function toggleCategory(row) {
+            const labels = chartAll.data.labels;
+            const dataset = chartAll.data.datasets[0].data;
+
+            const languageIndex = labels.indexOf(row.category);
+            
+            if (languageIndex == -1) {
+                labels.push(row.category);
+                dataset.push(row.avg_metacritic_score);
+
+                // Create a new data array initialized to 0 for each month
+                const monthData = chartMonth.data.labels.map(monthLabel => {
+                    const match = monthArray.find(item => 
+                        item.category === row.category &&
+                        parseInt(item.release_month) == months.indexOf(monthLabel)
+                    );
+                    return match ? match.avg_metacritic_score : 0;
+                });
+
+                // Push a new dataset for this language in chartMonths
+                chartMonth.data.datasets.push({
+                    label: row.category,
+                    borderColor: colorArray[colorIndex],
+                    borderWidth: 0.8,
+                    fill: true,
+                    data: monthData
+                });
+
+                colorIndex = (colorIndex + 1) % colorArray.length;
+
+            } else {
+                labels.splice(languageIndex, 1);
+                dataset.splice(languageIndex, 1);
+
+                // Remove data from chartMonth
+                const datasetIndex = chartMonth.data.datasets.findIndex(ds => ds.label === row.category);
+                if (datasetIndex !== -1) {
+                    chartMonth.data.datasets.splice(datasetIndex, 1);
+                }
+
+            }
+
+            chartAll.update();
+            chartMonth.update();
         });
 
         endTimer();
