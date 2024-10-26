@@ -2,6 +2,7 @@
 import { getAveragePriceAll, getAveragePriceGenre, getAveragePriceYear, getAveragePriceGenreOnYear } from './queryOne.js';
 import { getAudioSupportAll, getAudioSupportYear, getAudioSupportGenre, getAudioSupportGenreOnYear } from './queryTwo.js';
 import { getTextSupportAll, getTextSupportYear, getTextSupportGenre, getTextSupportGenreOnYear } from './queryThree.js';
+import { getScoreRankAll } from './queryFour.js';
 
 $(document).ready(function() {
 
@@ -48,6 +49,7 @@ $(document).ready(function() {
     $('#querySelect').on('change', function() {
         currentPage = 1;
         $("#currentPage").text(currentPage);
+        $("#options").hide();
         $(".optionDiv").hide();
         $(".option").val("all");
         $("#prevBtn").prop("disabled", true );
@@ -68,6 +70,9 @@ $(document).ready(function() {
                 $("#genreSelectDiv").show();
                 $("#yearSelectDiv").show();
                 getTextSupportAll();
+                break;
+            case "4":
+                getScoreRankAll();
                 break;
             default:
                 console.log("Invalid Query Number")
@@ -114,7 +119,7 @@ $(document).ready(function() {
                 else if (genre != "all" && year == "all")
                     getTextSupportGenre(genre); //slice
                 else if (genre != "all" && year != "all")
-                    getAudioSupportGenreOnYear(genre, year); // dice
+                    getTextSupportGenreOnYear(genre, year); // dice
                 break;
             default:
                 console.log("Invalid Query Configuration")

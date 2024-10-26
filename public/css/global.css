@@ -55,7 +55,8 @@ select {
     align-items: center;
 }
 
-.language-button {
+.language-button,
+.category-button {
     margin: 4px 2px;
 }
 
